@@ -1,0 +1,86 @@
+<div class="form-group" ng-repeat="attr in formAttrs" >
+  <div class="row"></div>
+
+    <label class="col col-sm-3 control-label">{{attr.label}}</label>
+
+  <div class="col col-sm-9">
+    <input ng-if="attr.type === 'Text' || attr.type === 'Password'"
+           name="{{attr.name}}"
+           type="{{attr.type}}"  
+           class="form-control"
+           ng-model="ngModel[attr.name]">
+    <!-- select ng-if="attr.type === 'Select'" 
+            ng-options="option.value as option.label for option in attr.realOptions"
+            ng-model="ngModel[attr.name]">
+    </select -->
+    <div ng-if="attr.type === 'Radio'"
+         class="btn-group">
+        <span class="btn btn-default" 
+               ng-model="ngModel[attr.name]" 
+               ng-repeat="option in attr.options"
+               btn-radio="option">
+               {{option}}
+        </span>
+    </div>
+    <div ng-if="attr.type === 'Select'"
+         ng-class="{'input-group':attr.additions}" 
+         >
+      <!-- options为对象类型 -->
+      <ui-select ng-model="ngModel[attr.name]"
+                 ng-if="!attr.isSimpleOption"
+                 theme="bootstrap"
+                 >
+          <ui-select-match placeholder="">{{$select.selected[attr.optionLabelName]}}</ui-select-match>
+          <ui-select-choices repeat="option[attr.optionValueName] as option in attr.options|filter:$select.search">
+            <div ng-bind-html="option[attr.optionLabelName]"></div>
+          </ui-select-choices>
+      </ui-select>
+      <!-- options为简单类型 -->
+      <ui-select ng-model="ngModel[attr.name]"
+                 ng-if="attr.isSimpleOption"
+                 theme="bootstrap"
+                 >
+          <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+          <ui-select-choices repeat="option as option in attr.options|filter:$select.search">
+            <div ng-bind-html="option"></div>
+          </ui-select-choices>
+      </ui-select>
+
+      <span class="input-group-addon" ng-repeat="ad in attr.additions">
+        <a href ng-click="ad.click()">{{ad.label}}</a>
+      </span>
+    </div>
+
+    <textarea ng-if="attr.type === 'Article'"
+              style="height:200px"
+              class="form-control"
+              ng-model="ngModel[attr.name]">
+    </textarea>
+    <div text-angular 
+         class="text-angular" 
+         ng-if="attr.type === 'Html'"
+         ng-model="ngModel[attr.name]">
+    </div>
+    <p class="input-group formitem-datepicker" ng-if="attr.type === 'Date'">
+      <input type="text" 
+             class="form-control" 
+             datepicker-popup="yyyy/MM/dd" 
+             ng-model="ngModel[attr.name]"
+             is-open="attr.$_isOpened"
+             close-text="Close" />
+      <span class="input-group-btn">
+        <button type="button" class="btn btn-sm btn-default" 
+                ng-click="SwitchDatePicker($event, attr)">
+          <i class="fa fa-calendar"></i>
+        </button>
+      </span>
+    </p>
+    <teleinput ng-if="attr.type === 'Tele'"
+               ng-model="ngModel[attr.name]">
+    </teleinput>
+    <person-name ng-if="attr.type === 'PersonName'"
+               ng-model="ngModel[attr.name]">
+    </person-name>
+  </div>
+</div>
+<div class="row"></div>

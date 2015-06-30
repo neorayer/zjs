@@ -1,0 +1,16 @@
+<div class="modal-header">
+  <button ng-click="Close(false)" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+  <h4 class="modal-title"><span class="glyphicon glyphicon-question-sign" ></span> {{title}} </h4>
+</div>
+<div class="modal-body">
+{{content}}
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-xs btn-info" ng-click="Close(true)">
+    <i class="glyphicon glyphicon-ok"></i> OK
+  </button>
+  <button class="btn btn-xs btn-default" ng-click="Close(false)">
+    <i class=""></i> Cancel
+  </button>
+</div>

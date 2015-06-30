@@ -1,0 +1,6 @@
+<ol class="{{bcClass}}">
+  <li><a ui-sref="home"><i class="fa fa-home"></i></a></li>
+  <li ng-repeat="level in [1,2,3,4,5,6,7,8,9]" ng-if="breadcrumbs[level]">
+    <a href ng-click="GotoBreadcrumb(level)"> {{breadcrumbs[level].title}}</a>
+  </li>
+</ol>
