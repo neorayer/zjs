@@ -70,8 +70,11 @@ var StateCreater = function(moduleDir, stateProvider) {
             state.views = {};
             state.views[viewName] = {
                 templateUrl: tplBase  + SnakeCase(state.name, '-') + '.html',
-                controller:  ctlName,
             };
+            if (state.name === stateRootName) {
+                state.views[viewName].controller = ctlName;
+            };
+
             stateProvider.state(state);
         })
     }

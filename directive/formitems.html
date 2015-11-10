@@ -18,8 +18,8 @@
         <span class="btn btn-default" 
                ng-model="ngModel[attr.name]" 
                ng-repeat="option in attr.options"
-               btn-radio="option">
-               {{option}}
+               btn-radio="option[attr.optionValueName]">
+               {{option[attr.optionLabelName]}}
         </span>
     </div>
     <div ng-if="attr.type === 'Select'"

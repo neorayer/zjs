@@ -206,6 +206,11 @@ Array.prototype.FindOne = function(cond) {
             return this[i];
 }
 
+Array.prototype.InsertAfter = function(itemInsert, itemAfter) {
+    var idx = this.indexOf(itemAfter);
+    this.splice(idx+1, 0, itemInsert);
+}
+
 Array.prototype.Replace = function(oldItem, newItem) {
     for (var i=0; i<this.length; i++) {
         if (this[i] == oldItem) {
