@@ -120,7 +120,11 @@ var InitModelFactory = function(app) {
                     $rootScope[_this.arrayName].length = 0; //这种清除的办法可以保留原数组的引用。
                 else
                     $rootScope[_this.arrayName] = []; 
+<<<<<<< HEAD
             }
+=======
+            }  
+>>>>>>> origin/master
 
             return _this.rs.query(cond).$promise.then(function(items){
                 if (filter)
@@ -154,7 +158,28 @@ var InitModelFactory = function(app) {
                 if (key.charAt(0) === '$')
                     delete model[key];
             }
-            
+
+            // save之前需要将populated的属性值回归成String类型（ObjectId）。
+            // TODO 还没仔细检查
+            if (_this.pops) {
+                _this.pops.forEach(function(pop) {
+                    if (!model[pop]) { 
+                        // 为undefined时
+                        return;
+                    } else if (typeof model[pop] === 'string') {
+                        // 为string时
+                        model[pop] = model[pop]['ObjectId'];
+                    }else if (model[pop].constructor === Array) {
+                        // 为array时
+                        var values = [];
+                        model[pop].forEach(function(obj){
+                            values.push(obj['ObjectId']);
+                        });
+                        model[pop] = values;
+                    }
+                });
+            } 
+
             return new this.rs(model).$save()
             .then(function(model) {
                 delete model.$promise;

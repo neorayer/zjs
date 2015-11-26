@@ -13,8 +13,11 @@ var Errhandler = function(err){
 }
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/master
 app.factory('ImageServ', function() {
     var instance = {
 
@@ -265,12 +268,15 @@ app.provider('ControllerHelper', function(){
                     //    rstCondition[restrict] = $state.params[restrict];
                     //});
                     return rs.Save(data).then(function(su){
+                        // 更新当前数据
+                         InitSetCurItem();
+
                         //显示提示信息
                         if (!$rootScope.alerts)
                             $rootScope.alerts = [];
                         var alert = {msg:'数据保存完毕。', type:'success'};
                         $rootScope.alerts.push(alert);
-                        // 几秒钟后，自动小时。
+                        // 几秒钟后，自动消失。
                         $timeout(function(){
                             $rootScope.alerts.Delete(alert);
                         }, 3000);
@@ -505,7 +511,6 @@ app.filter('removeExistsArrayBy_id', function() {
 });
 
 if (typeof CartRS !== 'undefined') {
-
     app.provider('CartServ', function(){
         this.$get = function($rootScope, $state, $cookieStore , CartRS, $timeout, $q, Cache, Dialogs) {
             var CreateCart = function() {
@@ -584,6 +589,7 @@ if (typeof CartRS !== 'undefined') {
 
                 Items: function() {
                     return cartItems;
+
                 },
 
                 TotalPrice: function() {
@@ -595,7 +601,7 @@ if (typeof CartRS !== 'undefined') {
                 },
 
                 IncQuantity: function(item, n) {
-                    var res = item.quantity + n
+                    var res = item.quantity + n;
                     if (res <= 1)
                         item.quantity = 1;
                     else
@@ -603,11 +609,12 @@ if (typeof CartRS !== 'undefined') {
                     SaveCart();
                 },
             }
-        }
+        };
     });
-
-    app.run(function($rootScope, CartServ){
-        $rootScope.CartServ = CartServ;
-    });
-
 }
+
+//TODO 关于CartServ这种动态加载的Serv如何去实现，还没有解决！！
+//app.run(function($rootScope, CartServ){
+    //$rootScope.CartServ = CartServ;
+app.run(function($rootScope){
+});

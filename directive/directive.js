@@ -63,7 +63,7 @@ app.directive('breadcrumb', function($rootScope, $state){
         {
           label: String , 标题
           name: String, 对应的ngModel的属性名
-          type: 'Select'|'Text'|'Article|'Password'|'Html', 表单项的输入类型。default='String'。当有options时='Select'。
+          type: 'Select'|'Radio'|'Text'|'Article|'Password'|'Html', 表单项的输入类型。default='String'。当有options时='Select'。
           options: [], 选项，格式如下：
             1. {
               label: '国家',
@@ -99,8 +99,19 @@ app.directive('formitems', function($rootScope, $state) {
             scope.formAttrs.forEach(function(formAttr){
                 if (formAttr.options) {
                     formAttr.type = formAttr.type || 'Select';
-                    formAttr.isSimpleOption = (typeof formAttr.options[0] === 'string' )
+                    formAttr.isSimpleOption = (typeof formAttr.options[0] === 'string')
                             || (typeof formAttr.options[0] === 'number' );
+                    //当options为简单类型['选项1', '选项2', '选项3']时，
+                    // 补充options[x].label和options[x].value
+                    if (typeof formAttr.options[0] === 'string') {
+                        console.log('sssssssssss');
+                        for(var i=0, len = formAttr.options.length; i<len; i++) {
+                            var v = formAttr.options[i];
+                            formAttr.options[i] = {label: v, value: v};
+                        }
+
+                    }
+
                     formAttr.optionLabelName = formAttr.optionLabelName || 'label';
                     formAttr.optionValueName = formAttr.optionValueName || 'value';
                 }
