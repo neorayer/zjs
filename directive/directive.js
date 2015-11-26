@@ -15,12 +15,11 @@ app.directive('setBreadcrumb', function($rootScope){
 //<breadcrumb bc-class="breadcrumb"></breadcrumb>
 app.directive('breadcrumb', function($rootScope, $state){
     return {
-        restrict: 'AE',
+        restrict: 'A',
         scope: {
-            bcClass: '@',
         },
         transclude: true,
-        templateUrl: '/js/directive/breadcrumb.html',
+        templateUrl: '/zjs/directive/breadcrumb.html',
         link: function(scope,  element, attrs, ngModeCtl) {
             //这个if非常重要，否则每次都覆盖了breadcrumbs
             if (!scope.breadcrumbs)
@@ -93,7 +92,7 @@ app.directive('formitems', function($rootScope, $state) {
             ngModel: '=',
         },
         transclude: true,
-        templateUrl: '/js/directive/formitems.html',
+        templateUrl: '/zjs/directive/formitems.html',
         link: function(scope,  element, attrs, ngModeCtl) {
             if (!scope.formAttrs)
                 throw new Error('<formitems> does not define attribute "formAttrs".');
@@ -129,7 +128,7 @@ app.directive('propitems', function($rootScope, $state){
             ngModel: '=',
         },
         transclude: true,
-        templateUrl: '/js/directive/propitems.html',
+        templateUrl: '/zjs/directive/propitems.html',
         link: function(scope,  element, attrs, ngModeCtl) {
             scope.myAttrs = scope.attrs.filter(function(attr){
                 if (!scope.filter)
@@ -179,7 +178,7 @@ app.directive('thumbmgr', function($rootScope, $state){
             afterLink: '=',
         },
         transclude: true,
-        templateUrl: '/js/directive/thumbmgr.html',
+        templateUrl: '/zjs/directive/thumbmgr.html',
         link: function(scope,  element, attrs, ngModeCtl) {
             scope.picHovered = null; 
             scope.picSelected = null;
@@ -221,7 +220,26 @@ app.directive('thumbmgr', function($rootScope, $state){
 });
 
 
+app.directive('bootstrapNav', function($rootScope, $state){
+    return {
+        restrict: 'A',
+        scope: {
+            items: '=',
+        },
+        transclude: true,
+        templateUrl: '/zjs/directive/bootstrap-nav.html',
+        link: function(scope,  element, attrs, ngModeCtl) {
 
+            scope.IsActive = function(item) {
+                item.stateGroup =  item.stateGroup || item.state;
+                var idx = item.stateGroup.indexOf('(');
+                if (idx >= 0)
+                    item.stateGroup = item.stateGroup.substring(0, idx - 1);
+                return $state.current.name.indexOf(item.stateGroup) === 0;
+            }
+        }
+    }
+});
 
 
 app.directive('mainmenu', function($rootScope, $state){
@@ -231,7 +249,7 @@ app.directive('mainmenu', function($rootScope, $state){
             menus : '=',
         },
         transclude: true,
-        templateUrl: '/js/directive/mainmenu.html',
+        templateUrl: '/zjs/directive/mainmenu.html',
         link: function(scope,  element, attrs, ngModeCtl) {
 
             scope.IsActive = function(item) {
@@ -280,7 +298,7 @@ app.directive('navtabs', function($rootScope, $state){
             tabs : '=',
         },
         transclude: true,
-        templateUrl: '/js/directive/navtabs.html',
+        templateUrl: '/zjs/directive/navtabs.html',
         link: function(scope,  element, attrs, ngModeCtl) {
 
             scope.IsActive = function(item) {
@@ -301,7 +319,7 @@ app.directive('teleinput', function($rootScope, $state){
             ngModel: '=',
         },
         transclude: true,
-        templateUrl: '/js/directive/teleinput.html',
+        templateUrl: '/zjs/directive/teleinput.html',
         link: function(scope,  element, attrs, ngModeCtl) {
 
             var update = function() {
@@ -375,7 +393,7 @@ app.directive('personName', function($rootScope, $state){
             isMidHidden: '=',
         },
         transclude: true,
-        templateUrl: '/js/directive/person-name.html',
+        templateUrl: '/zjs/directive/person-name.html',
         link: function(scope,  element, attrs, ngModeCtl) {
         }
     }

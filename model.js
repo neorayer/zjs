@@ -115,8 +115,12 @@ var InitModelFactory = function(app) {
 
             var _this = this;
             //先清空。因为Load是异步调用，用户可能先看到上次残留的数据。
-            if (isDefaultList && _this.arrayName)
-                $rootScope[_this.arrayName] = []; 
+            if (isDefaultList && _this.arrayName) {
+                if ($rootScope[_this.arrayName])
+                    $rootScope[_this.arrayName].length = 0; //这种清除的办法可以保留原数组的引用。
+                else
+                    $rootScope[_this.arrayName] = []; 
+            }
 
             return _this.rs.query(cond).$promise.then(function(items){
                 if (filter)

@@ -1,3 +1,20 @@
+
+var Errhandler = function(err){
+    console.error(err);
+    if (err.data) {
+        if (err.data.msg) {
+            alert(err.data.msg);
+        }else {
+            alert(err.data);
+        }
+    }else {
+        alert(err);
+    }
+}
+
+
+
+
 app.factory('ImageServ', function() {
     var instance = {
 
@@ -91,7 +108,7 @@ app.provider('Dialogs', function() {
         return {
             Confirm: function(content, title) {
                 var win = $modal.open({
-                    templateUrl: '/js/tpls/dialog-confirm.html',
+                    templateUrl: '/zjs/tpls/dialog-confirm.html',
                     controller: function($scope, $modalInstance, params) {
                         $scope.title = params.title || '确认';
                         $scope.content = params.content;
@@ -114,7 +131,7 @@ app.provider('Dialogs', function() {
 
             Form: function(scope, params) {
                 var win = $modal.open({
-                    templateUrl: '/js/tpls/dialog-form.html',
+                    templateUrl: '/zjs/tpls/dialog-form.html',
                     controller: function($scope, $modalInstance, params) {
                         angular.extend($scope, params);
 
@@ -223,14 +240,14 @@ app.provider('ControllerHelper', function(){
 
 
                 $scope.Delete = function(data) {
-                    // return Dialogs.Confirm("是否确认删除此数据?", "删除确认")
-                    // .then(function(isYes){
-                    //     if (isYes) {
+                    return Dialogs.Confirm("是否确认删除此数据?", "删除确认")
+                    .then(function(isYes){
+                        if (isYes) {
                             return rs.DeleteById(data._id).then(function(){
                                 $state.go(listState);
                             }, Errhandler);
-                    //     }
-                    // })
+                        }
+                    })
                 }
 
                 $scope.Save = function(data) {
@@ -271,7 +288,12 @@ app.provider('ControllerHelper', function(){
                 }
 
                 $scope.DialogEdit = function(data, templateUrl) {
-                    var templateUrl = templateUrl || $state.get(editState).views[""].templateUrl;
+                    if (!templateUrl)  {
+                        var state = $state.get(editState);
+                        if (!state)
+                            throw new Error('Can not get state: '  + editState);
+                        templateUrl = $state.get(editState).views[""].templateUrl;
+                    }
 
                     $scope[formModelName] = angular.copy(data);
                     Dialogs.Form($scope, {
@@ -296,7 +318,8 @@ app.provider('ControllerHelper', function(){
 
                 return $q.when()
                     .then(InitLoadList)
-                    .then(InitSetCurItem);
+                    .then(InitSetCurItem)
+                    .catch(Errhandler);
             }
         }
     }
@@ -344,6 +367,12 @@ app.factory('DictServ', function($rootScope) {
             {k: 'Supplier', v: '供应商'},
             {k: 'Client', v: '客户'},
             {k: 'Other', v: '其他'},
+        ]);
+        CreateDict('LogiType', [
+            {k: 'agent', v: '货运代理'},
+            {k: 'logistics', v: '跨国货运公司'},
+            {k: 'local', v: '同城快递'},
+            {k: 'national', v: '国内快递'},
         ]);
     };
 
