@@ -22,25 +22,7 @@ app.directive('breadcrumb', function($rootScope, $state){
         transclude: true,
         templateUrl: '/zjs/directive/breadcrumb.html',
         link: function(scope,  element, attrs, ngModeCtl) {
-            //这个if非常重要，否则每次都覆盖了breadcrumbs
-            if (!scope.breadcrumbs)
-                scope.breadcrumbs = [];
-
-           $rootScope.SetBreadcrumb = function(level, title) {
-                scope.breadcrumbs[level] = {
-                    level: level,
-                    title: title,
-                    srefTo: $state.current.name,
-                    srefParams: $state.params,
-                };
-                var crumbs = scope.breadcrumbs;
-                // 清除下面级别，已经无效的crumbs
-                for(var i=0,len=crumbs.length; i<len; i++) {
-                     if (i > level) {
-                        crumbs[i] = null;
-                    }
-                } 
-            }
+            scope.breadcrumbs = $rootScope.breadcrumbs;
 
             scope.GotoBreadcrumb = function(level) {
                 var bc = scope.breadcrumbs[level];
@@ -55,12 +37,26 @@ app.directive('breadcrumb', function($rootScope, $state){
 /** 自动生成表单输入项目 **
     用法：
         <form>
-          <formitems form-attrs="attrs" ng-model="formSupplier"></formitems>
+          <formitems form-attrs="attrs" form-error="error" ng-model="formSupplier"></formitems>
           <button>保存</button>
         </form> 
 
     formAttrs的格式:
     [
+        {
+            label: 'Email',
+            name: 'email',
+            placeholder: 'The email is you account ID',
+            validator: function(v) { if (!validator.isEmail(v)) return 'The email address is invalid.' },
+        },
+        {
+            id: 'password-ipt',
+            label: 'Password',
+            name: 'password',
+            type: 'Password',
+            placeholder: '6 letters or numbers at least',
+            validator: function(v) { if (v.length < 6) return '6 letters or numbers at least'}
+        },
         {
           label: String , 标题
           name: String, 对应的ngModel的属性名
@@ -84,6 +80,8 @@ app.directive('breadcrumb', function($rootScope, $state){
   ]  
 
   type: ['Text', 'Password', 'Article', 'Tele', 'PersonName', 'Number', 'Select', 'Radio']
+
+  formError对应$scope里的一个对象，格式为 {field: xxxx, msg: xxxx, ...}
 **/
 app.directive('formitems', function($rootScope, $state) {
     return {
@@ -91,6 +89,7 @@ app.directive('formitems', function($rootScope, $state) {
         scope: {
             formAttrs: '=',
             ngModel: '=',
+            formError: '=', 
         },
         transclude: true,
         templateUrl: '/zjs/directive/formitems.html',
@@ -105,7 +104,6 @@ app.directive('formitems', function($rootScope, $state) {
                     //当options为简单类型['选项1', '选项2', '选项3']时，
                     // 补充options[x].label和options[x].value
                     if (typeof formAttr.options[0] === 'string') {
-                        console.log('sssssssssss');
                         for(var i=0, len = formAttr.options.length; i<len; i++) {
                             var v = formAttr.options[i];
                             formAttr.options[i] = {label: v, value: v};
@@ -118,12 +116,42 @@ app.directive('formitems', function($rootScope, $state) {
                 }
                 // type: String | Article; default Text.
                 formAttr.type = formAttr.type || 'Text';
+                // convert all type to lower case.
+                formAttr.type = formAttr.type.toLowerCase();
             })
+
+            scope.IsAttrError = function(attr) {
+                return scope.formError 
+                        && scope.formError.field 
+                        && scope.formError.field === attr.name;
+            }
+
+            scope.AttrId = function(attr) {
+                if (attr.id)
+                    return attr.id;
+                return attr.name + "-input";
+            }
 
             scope.SwitchDatePicker = function($event, attr) {
                 $event.preventDefault();
                 $event.stopPropagation();
                 attr.$_isOpened = !attr.$_isOpened;
+            }
+
+            scope.Validate = function(attr) {
+                if (!attr.validator)
+                    return;
+
+                var errMsg = attr.validator(scope.ngModel[attr.name]);
+                if (errMsg) {
+                    scope.formError = {
+                        field: attr.name,
+                        msg: errMsg,
+                    }
+                }else {
+                    scope.formError = null;
+                }
+
             }
         }
     }
@@ -205,6 +233,7 @@ app.directive('thumbmgr', function($rootScope, $state){
 
             scope.Mouseover = function(pic) {
                 scope.picHovered = pic;
+                
             }
 
             scope.Mouseleave = function(pic) {
@@ -218,6 +247,7 @@ app.directive('thumbmgr', function($rootScope, $state){
 
             scope.IsHovered = function(pic) {
                 return scope.picHovered === pic;
+                console.log(scope.picHovered, pic)
             }
 
             scope.ClickDelete = function(pic) {
@@ -254,9 +284,13 @@ app.directive('bootstrapNav', function($rootScope, $state){
 });
 
 
+/*
+    <ul mainmenu class="menu" menus="menus"></ul>
+    必须放在 <ul>或<ol>内。
+*/
 app.directive('mainmenu', function($rootScope, $state){
     return {
-        restrict: 'E',
+        restrict: 'A',
         scope: {
             menus : '=',
         },
@@ -322,7 +356,7 @@ app.directive('navtabs', function($rootScope, $state){
             }
         }
     }
-});
+})
 
 app.directive('teleinput', function($rootScope, $state){
     return {
@@ -333,7 +367,6 @@ app.directive('teleinput', function($rootScope, $state){
         transclude: true,
         templateUrl: '/zjs/directive/teleinput.html',
         link: function(scope,  element, attrs, ngModeCtl) {
-
             var update = function() {
                 var s = '';
 
@@ -409,4 +442,19 @@ app.directive('personName', function($rootScope, $state){
         link: function(scope,  element, attrs, ngModeCtl) {
         }
     }
+});
+
+
+app.directive('myEnter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.myEnter);
+                });
+
+                event.preventDefault();
+            }
+        });
+    };
 });
