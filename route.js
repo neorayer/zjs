@@ -39,7 +39,7 @@ var StateCreater = function(moduleDir, stateProvider) {
             {
                 name: stateRootName,
                 url: '/' + getModelName(stateRootName),
-            },
+             },
             {
                 name: stateRootName+ '.cover',
                 url: '/cover',

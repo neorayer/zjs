@@ -120,8 +120,8 @@ var InitModelFactory = function(app) {
                     $rootScope[_this.arrayName].length = 0; //这种清除的办法可以保留原数组的引用。
                 else
                     $rootScope[_this.arrayName] = []; 
-            }  
 
+            }  
             return _this.rs.query(cond).$promise.then(function(items){
                 if (filter)
                     items = items.filter(filter);

@@ -15,9 +15,8 @@ app.directive('setBreadcrumb', function($rootScope){
 //<breadcrumb bc-class="breadcrumb"></breadcrumb>
 app.directive('breadcrumb', function($rootScope, $state){
     return {
-        restrict: 'AE',
+        restrict: 'A',
         scope: {
-            bcClass: '@',
         },
         transclude: true,
         templateUrl: '/zjs/directive/breadcrumb.html',

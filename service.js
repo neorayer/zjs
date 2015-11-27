@@ -547,3 +547,8 @@ app.filter('removeExistsArrayBy_id', function() {
 });
 
 
+//TODO 关于CartServ这种动态加载的Serv如何去实现，还没有解决！！
+//app.run(function($rootScope, CartServ){
+    //$rootScope.CartServ = CartServ;
+app.run(function($rootScope){
+});
