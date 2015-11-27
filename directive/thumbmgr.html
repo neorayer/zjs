@@ -1,6 +1,5 @@
 <div class="thumb"
      ng-repeat="pic in pictures" href
-     style=""
      ng-mouseover="Mouseover(pic)"
      ng-mouseleave="Mouseleave(pic)"
      ng-click="Select(pic)"
@@ -8,6 +7,7 @@
   <img class="thumb-size" 
        ng-src="{{pic.url}}" 
        ng-class="{selected:IsSelected(pic),hover:IsHovered(pic)}"
+       ng-mouseover="Mouseover(pic)"
        >
   <div class="topright-circle" 
        ng-class="{hidden:!IsHovered(pic)}"
@@ -16,6 +16,6 @@
     <a href><i class="fa fa-close"></i></a>
   </div>
 </div>
-<div class="thumb-size">
-<a class="thumb-size thumb-btn" href id="thumb-upload-btn" style="float:left">+上传图片</a>
-</div>
+
+  <a class="thumb-size thumb-btn" href id="thumb-upload-btn" style="float:left">+上传图片</a>
+
