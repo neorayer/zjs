@@ -1,19 +1,25 @@
-<div class="form-group" ng-repeat="attr in formAttrs" >
+<div class="form-group" 
+     ng-class="{'has-error': IsAttrError(attr)}"
+     ng-repeat="attr in formAttrs" >
   <div class="row"></div>
 
-    <label class="col col-sm-3 control-label">{{attr.label}}</label>
+    <label for="{{AttrId(attr)}}" class="col col-sm-3 control-label">{{attr.label}}</label>
 
   <div class="col col-sm-9">
-    <input ng-if="attr.type === 'Text' || attr.type === 'Password'"
+    <input ng-if="attr.type === 'text' || attr.type === 'password'"
+           id = "{{AttrId(attr)}}"
            name="{{attr.name}}"
            type="{{attr.type}}"  
            class="form-control"
-           ng-model="ngModel[attr.name]">
-    <!-- select ng-if="attr.type === 'Select'" 
+           placeholder="{{attr.placeholder}}"
+           ng-model="ngModel[attr.name]"
+           ng-blur="Validate(attr)"
+           >
+    <!-- select ng-if="attr.type === 'select'" 
             ng-options="option.value as option.label for option in attr.realOptions"
             ng-model="ngModel[attr.name]">
     </select -->
-    <div ng-if="attr.type === 'Radio'"
+    <div ng-if="attr.type === 'radio'"
          class="btn-group">
         <span class="btn btn-default" 
                ng-model="ngModel[attr.name]" 
@@ -22,7 +28,7 @@
                {{option[attr.optionLabelName]}}
         </span>
     </div>
-    <div ng-if="attr.type === 'Select'"
+    <div ng-if="attr.type === 'select'"
          ng-class="{'input-group':attr.additions}" 
          >
       <!-- options为对象类型 -->
@@ -51,18 +57,20 @@
       </span>
     </div>
 
-    <textarea ng-if="attr.type === 'Article'"
+    <textarea ng-if="attr.type === 'article'"
+              id = "{{AttrId(attr)}}"
               style="height:200px"
               class="form-control"
               ng-model="ngModel[attr.name]">
     </textarea>
     <div text-angular 
          class="text-angular" 
-         ng-if="attr.type === 'Html'"
+         ng-if="attr.type === 'html'"
          ng-model="ngModel[attr.name]">
     </div>
-    <p class="input-group formitem-datepicker" ng-if="attr.type === 'Date'">
+    <p class="input-group formitem-datepicker" ng-if="attr.type === 'date'">
       <input type="text" 
+             id = "{{AttrId(attr)}}"
              class="form-control" 
              datepicker-popup="yyyy/MM/dd" 
              ng-model="ngModel[attr.name]"
@@ -75,12 +83,16 @@
         </button>
       </span>
     </p>
-    <teleinput ng-if="attr.type === 'Tele'"
+    <teleinput ng-if="attr.type === 'tele'"
                ng-model="ngModel[attr.name]">
     </teleinput>
-    <person-name ng-if="attr.type === 'PersonName'"
+    <person-name ng-if="attr.type === 'personname'"
                ng-model="ngModel[attr.name]">
     </person-name>
+    <p class="help-block" ng-show="IsAttrError(attr)">
+      {{formError.msg}}
+    </p>
   </div>
 </div>
+
 <div class="row"></div>
