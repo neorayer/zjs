@@ -139,12 +139,26 @@ OpenWindow = exports.OpenWindow = function(verb, url, data, target) {
 
 
 
+//将obj对象转换成url query
+ObjectToQuery = exports.ObjectToQuery = function(obj, prefix) {
+    if (!obj) return "";
+    var str = [];
+    for(var p in obj) {
+        if (obj.hasOwnProperty(p)) {
+            var k = prefix ? prefix + "[" + p + "]" : p, v = obj[p];
+            str.push(typeof v == "object" ?
+                   serialize(v, k) :
+            encodeURIComponent(k) + "=" + encodeURIComponent(v));
+        }
+    }
+    return str.join("&");
+}
 
 
-
-
-
-
+// 抛出一个错误对象，格式为 {field: xxxx, msg: xxx, error: ....}
+ThrowError = exports.ThrowError = function(field, msg) {
+    throw {field: field, error: new Error(msg)};
+}
 
 
 
