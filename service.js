@@ -212,6 +212,7 @@ app.provider('ControllerHelper', function(){
                 var InitLoadList = function() {
                     if ($scope[listName]) 
                         return;
+            console.log('1111111111')
                     $scope[listName] = [];
                     return rs.Load(rstCondition).then(function(datas){
                         $scope[listName]= datas;
@@ -230,7 +231,7 @@ app.provider('ControllerHelper', function(){
                     }
                 }
                 
-                $scope.LoadList = function() {
+                $scope.LoadList = function(){
                     return rs.Load(rstCondition).then(function(datas){
                         $scope[listName]= datas;
                     });
@@ -316,6 +317,13 @@ app.provider('ControllerHelper', function(){
                      pa[idName] = data._id;
                     $state.go(detailState, pa);
                 }
+
+                InitSetCurItem();
+
+                //这里有一个严重的BUG。由于此处使用promise模式，
+                // 使得 InitLoadList和InitSetCurItem在页面的ng-init指定的函数执行以后才执行。造成数据延后，无法找到。
+                // 为了暂时避免这个问题，先执行 InitSetCurItem()
+                InitSetCurItem();
 
                 return $q.when()
                     .then(InitLoadList)
@@ -476,6 +484,39 @@ app.run(function($rootScope, FileTypeServ){
     $rootScope.FileTypeServ = FileTypeServ;
 })
 
+
+
+
+app.factory('BreadcrumbServ', function($state, $rootScope) {
+    return {
+        Set: function(level, title) {
+
+            $rootScope.breadcrumbs[level] = {
+                level: level,
+                title: title,
+                srefTo: $state.current.name,
+                srefParams: $state.params,
+            };
+            var crumbs = $rootScope.breadcrumbs;
+            // 清除下面级别，已经无效的crumbs
+            for(var i=0,len=crumbs.length; i<len; i++) {
+                 if (i > level) {
+                    crumbs[i] = null;
+                }
+            } 
+
+console.log(level, title, crumbs);
+        }
+    }
+});
+
+app.run(function($rootScope, BreadcrumbServ){
+    $rootScope.breadcrumbs = [];
+    $rootScope.BreadcrumbServ = BreadcrumbServ;
+});
+
+
+
 //转换成友好的尺寸格式
 app.filter('bytes', function() {
     return function(bytes, precision) {
@@ -505,111 +546,4 @@ app.filter('removeExistsArrayBy_id', function() {
     }
 });
 
-if (typeof CartRS !== 'undefined') {
-    app.provider('CartServ', function(){
-        this.$get = function($rootScope, $state, $cookieStore , CartRS, $timeout, $q, Cache, Dialogs) {
-            var CreateCart = function() {
-                return CartRS.Save({_id: 'new'}).then(function(cart) {
-                    $rootScope._cart = cart;
-                    $cookieStore.put('CartId', cart._id);
-                });
-            }
 
-            var TryLoadCart = function() {
-                cartId = $cookieStore.get('CartId');
-                if (!cartId)
-                    return false;
-                return CartRS.Read(cartId, true).then(function(cart) {
-                    if (!cart)
-                        return false;
-                    $rootScope._cart = cart;
-                    return true;
-                });
-            }
-
-            var SaveCart = function() {
-                return CartRS.Save($rootScope._cart).catch(function(err){
-                    console.error(err.stack);
-                })
-            }
-
-            var cartItems = [];
-
-            return {
-                Init: function() {
-                    
-                    $q.when().then(TryLoadCart)
-                    .then(function(isLoaded){
-                        if (!isLoaded)
-                            return CreateCart();
-                    }).then(function(){
-                        if (!$rootScope._cart.items)
-                            $rootScope._cart.items = [];
-                        cartItems = $rootScope._cart.items;
-                    }, function(err) {
-                        console.error('CartServ Error', err.stack);
-                    });                
-                },
-                /** item {
-                        data: object,
-                        id: String,
-                        quantity: Number,
-                        unitPrice: Number,
-                    }
-                */
-                AddItem: function(newItem) {
-                    for (var i = 0; i< cartItems.length; i++) {
-                        var item = cartItems[i];
-                        if (item.id === newItem.id) {
-                            item.quantity += newItem.quantity;
-                            return;
-                        }
-                    }
-                    cartItems.push(newItem);
-                    SaveCart();
-                },
-
-                DeleteItem: function(item) {
-                    cartItems.Delete(item);
-                    SaveCart();
-                },
-
-                ItemsCount: function() {
-                    var count = 0;
-                    cartItems.forEach(function(item){
-                        count += item.quantity;
-                    })
-                    return count;
-                },
-
-                Items: function() {
-                    return cartItems;
-
-                },
-
-                TotalPrice: function() {
-                    var total = 0;
-                    cartItems.forEach(function(item){
-                        total += item.quantity * item.unitPrice;
-                    })
-                    return total;
-                },
-
-                IncQuantity: function(item, n) {
-                    var res = item.quantity + n;
-                    if (res <= 1)
-                        item.quantity = 1;
-                    else
-                        item.quantity = res;
-                    SaveCart();
-                },
-            }
-        };
-    });
-}
-
-//TODO 关于CartServ这种动态加载的Serv如何去实现，还没有解决！！
-//app.run(function($rootScope, CartServ){
-    //$rootScope.CartServ = CartServ;
-app.run(function($rootScope){
-});
