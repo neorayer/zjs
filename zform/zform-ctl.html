@@ -1,0 +1,115 @@
+<!-- Readonly -->
+<div ng-if="ctl.type === 'label'" 
+     class="control-label">
+  <label > 
+    <span>{{ctl.text}}</span>
+    <span ng-if="ctl.isRequired" ng-class="text-error">*</span>
+  </label>
+</div>
+
+<span ng-if="ctl.type === 'text'">
+  {{ctl.text}}
+</span>
+
+<button ng-if="ctl.type === 'button'"
+        type="{{ctl.btnType}}"
+        class="btn btn-block {{ctl.cssBtn}}  btn-raised"
+        ng-click="ctl.btnClick()"
+        ng-disabled = "ctl.isDoing"
+        >
+  <i ng-if="ctl.icon" class="{{ctl.icon}}"></i>
+  {{ctl.btnText}}
+</button>
+
+<div ng-if="ctl.type === 'dropdown-button'">
+    <button type="button" 
+            class="btn btn-block dropdown-toggle {{ctl.cssBtn}}" 
+            data-toggle="dropdown" >
+      {{ctl.text}} <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu"> 
+      <li ng-repeat="option in ctl.options">
+          <a href ng-click="ctl.onSelectItem(option)">{{ctl.getOptionLabel(option)}}</a>
+      </li>
+    </ul>
+</div>
+
+
+
+
+<!-- Editable -->
+
+<input ng-if="ctl.type === 'input'"
+   type="{{ctl.inputType}}" 
+   class="form-control {{ctl.class}}"
+   placeholder="{{ctl.placeholder}}"
+   name="{{ctl.name}}"
+   ng-blur="ctl.validate()"
+   ng-model="ngModel[ctl.name]"
+   />
+<span ng-if="ctl.type === 'input' && ctl.ngClass['has-feedback']"
+      class="form-control-feedback glyphicon"
+      ng-class="getNgClass()"  >
+</span> 
+
+<textarea ng-if="ctl.type === 'textarea'"
+          class="form-control {{ctl.class}}"
+          placeholder="{{ctl.placeholder}}"
+          name="{{ctl.name}}"
+          ng-blur="ctl.validate()"
+          ng-model="ngModel[ctl.name]"
+          style="height:{{ctl.height}}"
+>
+</textarea>
+
+<div ng-if="ctl.type === 'checkbox'"
+     ng-class="{checkbox: !ctl.isInGroup}">
+  <label>
+    <input type="checkbox" 
+           ng-model="ngModel[ctl.name]" 
+           name="{{ctl.name}}" 
+           /> 
+    {{ctl.text}}
+  </label>
+</div>
+
+<div ng-if="ctl.type === 'radio-buttons'" 
+     class="btn-group">
+  <label ng-repeat="option in ctl.options"
+         btn-radio="option.value" 
+         class="btn {{ctl.cssBtn}}" 
+         ng-model="ngModel[ctl.name]" >
+    {{option.label}} 
+  </label>
+</div>
+
+<span ng-if="ctl.type === 'radio'">
+  <div ng-class="{radio: !ctl.isInGroup}"
+       ng-repeat="option in ctl.options">
+    <label >
+      <input type="radio" 
+             ng-model="ngModel[ctl.name]" 
+             name="{{ctl.name}}" 
+             value="{{option.value}}" /> 
+      {{option.label}}
+    </label>
+  </div>
+</span>
+
+<ui-select ng-if="ctl.type === 'select'"
+           ng-model="ngModel[ctl.name]"
+           on-select="ctl.onSelect($item,$model)"
+           theme="bootstrap">
+  <ui-select-match placeholder="{{ctl.placeholder}}">{{ctl.getOptionLabel($select.selected)}}</ui-select-match>
+  <ui-select-choices repeat="option in ctl.options|filter:$select.search">
+        <div ng-bind-html="ctl.getOptionLabel(option)"></div>
+      </ui-select-choices>
+</ui-select>
+
+<div ng-if="ctl.type === 'pictures'"
+     zform-pics="ctl"
+     ng-model="ngModel[ctl.name]">
+</div>
+
+
+

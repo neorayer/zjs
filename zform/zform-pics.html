@@ -1,0 +1,36 @@
+<div class="clearfix">
+  <div ng-show="!def.isViewOnly" class="thumb">
+  <a  
+     class="thumb-size thumb-btn " 
+     id="thumb-upload-btn" 
+     style="float:left"
+     href >
+    {{btnText}}
+  </a>
+  <div class="thumb thumb-size"
+       ng-repeat="pic in def.ngModel[def.name]" href
+       ng-mouseover="Mouseover(pic)"
+       ng-mouseleave="Mouseleave(pic)"
+       ng-click="Select(pic)">
+    <div ng-if="pic.$_isUploading" 
+         class="progress progress-striped active">
+      <div class="progress-bar progress-bar-info"
+           style="width: {{pic.upPercent}}%">{{pic.upPercent}}%
+      </div>
+    </div>
+    <img class="thumb-size" 
+         ng-if="!pic.$_isUploading"
+         ng-src="{{pic.thumbSrc}}" 
+         ng-class="{selected:IsSelected(pic),hover:IsHovered(pic)}"
+         ng-mouseover="Mouseover(pic)"
+         >
+    <div class="topright-circle" 
+         ng-class="{hidden:!IsHovered(pic)}"
+         ng-click="ClickDelete(pic)"
+         >
+      <a href><i class="fa fa-close"></i></a>
+    </div>
+  </div>
+
+
+</div>

@@ -1,0 +1,13 @@
+<div  ng-class="getNgClass()">
+  <div ng-transclude></div>
+
+  <ul ng-if="validMsgs.length > 0" class="help-block">
+    <li ng-repeat="msg in validMsgs track by $index">{{msg}}</li>
+  </ul>
+
+  <ul ng-if="findMyServerErrors()" class="help-block">
+    <li ng-repeat="msg in myServerErrors">{{msg}}</li>
+  </ul>
+
+</div>
+

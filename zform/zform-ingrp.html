@@ -1,0 +1,18 @@
+<div ng-if="def.type === 'input-group'"
+     class="input-group">
+  <span ng-if="def.left"
+       zform-ctl 
+       ctl="def.left"
+       class="{{leftClass}}">
+  </span>
+  <span ng-if="def.input"
+       zform-ctl
+       ctl="def.input">
+  </span>
+
+  <span ng-if="def.right"
+       zform-ctl
+       ctl="def.right"
+       class="{{rightClass}}">
+  </span>
+</div>

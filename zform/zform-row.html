@@ -1,0 +1,17 @@
+<div class="form-group" >
+  <div zform-col 
+       ng-repeat="col in cols" 
+       class="{{col.cssCol}}" 
+       >
+
+ 
+
+    <div ng-if="col.type==='input-group'" zform-ingrp="col"></div>
+    <zform-ctl ctl="col"> </zform-ctl>
+
+    
+
+
+
+  </div>
+</div>

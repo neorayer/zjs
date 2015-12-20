@@ -154,7 +154,6 @@ ObjectToQuery = exports.ObjectToQuery = function(obj, prefix) {
     return str.join("&");
 }
 
-
 // 抛出一个错误对象，格式为 {field: xxxx, msg: xxx, error: ....}
 ThrowError = exports.ThrowError = function(field, msg) {
     throw {field: field, error: new Error(msg)};
@@ -299,6 +298,11 @@ Array.prototype.DeleteArray = function(items) {
         this.Delete(items[i]);
 }
 
+Array.prototype.PushArray = function(items) {
+    for (var i=0; i<items.length; i++)
+        this.push(items[i]);
+}
+
 // ////////////////////////////////////////////////////////////
 // var StandControllerInit = function($scope, $state, mn /* Model Name */, rs) {
 //     var listName = mn + 's';
@@ -319,3 +323,19 @@ Array.prototype.DeleteArray = function(items) {
 //         $scope[formModelName] = angular.copy($scope[mn]);
 //     }
 // }
+
+
+YearsArray = exports.YearsArray = function(beginY, endY) {
+    var years = new Array();
+    if (endY >= beginY) {
+        for(var i=beginY; i<=endY; i ++) {
+            years.push(i);
+        }
+    } else {
+        for(var i=beginY; i>=endY; i --) {
+            years.push(i);
+        }
+    }
+    return years;
+
+}

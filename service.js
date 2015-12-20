@@ -187,6 +187,8 @@ app.provider('ControllerHelper', function(){
             Init: function($scope, controller, modelLabel/* model label */, mn /* model name */, rs, restricts, stateHead) {
 
 //                var serv = StdServProvider.GetServ($scope, controller, modelLabel, mn, rs, restricts, stateHead);
+                //用于zform，服务端验证的model
+                $scope.serverErrors = {};
 
                 var listName = mn + 's';                        // suppliers
                 var formModelName = 'form' + CapitalFirst(mn);  //formSupplier
@@ -204,42 +206,54 @@ app.provider('ControllerHelper', function(){
                     rstCondition[restrict] = $state.params[restrict];
                 });
  
-               stateHead += mn + '.';
+                stateHead += mn + '.';
                 var editState   = stateHead + 'one.edit';
                 var listState   = stateHead + 'list';
                 var detailState = stateHead + 'one.detail';
 
-                var InitLoadList = function() {
-                    if ($scope[listName]) 
-                        return;
-            console.log('1111111111')
-                    $scope[listName] = [];
-                    return rs.Load(rstCondition).then(function(datas){
-                        $scope[listName]= datas;
+                var condKey = rs.CondKey(rstCondition);
+
+                var InitLoad = function() {
+                    return rs.Load(rstCondition, null, true).then(function(datas){
+                        InitSetCurItem();
                     });
                 }
 
                 var InitSetCurItem = function() {
+                    if (!$scope[formModelName])
+                        throw new Error('$scope.' + formModelName + ' should be defined before ControllerHelper.Init()');
                     if ($state.params[idName]) {
                         if ($state.params[idName] === 'new') {
                             $scope[mn] = null;
-                            $scope[formModelName] =  {_id: 'new'};
+                            $scope[formModelName]._id = 'new';
                         }else {
-                            $scope[mn] = Cache.get($state.params[idName]);
-                            $scope[formModelName] = angular.copy($scope[mn]);
+                            var doc = Cache.get($state.params[idName]);
+                            if (!doc) {
+                                return;
+                            }
+                            if (!$scope[mn])        //不存在则从cache里取一个
+                                $scope[mn] = doc;
+                            if ($scope[mn] !== doc) //存在但不是当前所需的，则复制过来
+                                angular.copy(doc, $scope[mn]);
+
+                            if ($scope[formModelName]) {
+                                angular.copy(doc, $scope[formModelName]);
+                            }else {
+                                $scope[formModelName] = angular.copy(doc);
+                            }
                         }
                     }
                 }
                 
                 $scope.LoadList = function(){
-                    return rs.Load(rstCondition).then(function(datas){
-                        $scope[listName]= datas;
+                    return rs.Load(rstCondition, null, true).then(function(datas){
+                        InitSetCurItem();
                     });
                 }
 
 
                 $scope.Delete = function(data) {
-                    return Dialogs.Confirm("是否确认删除此数据?", "删除确认")
+                    return Dialogs.Confirm("是否确认删除此" + modelLabel + "?", "删除确认")
                     .then(function(isYes){
                         if (isYes) {
                             return rs.DeleteById(data._id).then(function(){
@@ -249,7 +263,23 @@ app.provider('ControllerHelper', function(){
                     })
                 }
 
+                $scope.DeleteChecked = function() {
+                    return Dialogs.Confirm("是否确认删除所选的" + modelLabel + "?", "删除确认")
+                    .then(function(isYes){
+                        if (isYes) {
+                            return $q.all($scope[listName].map(function(doc){
+                                if (!doc.isChecked)
+                                    return;
+                                return rs.DeleteById(doc._id);
+                            })).then(function(){
+                                $state.go(listState);
+                            }, Errhandler);
+                        }
+                    })
+                }
+
                 $scope.Save = function(data) {
+
                     return  $scope.SimpleSave(data).catch(Errhandler);
                 }
 
@@ -318,17 +348,20 @@ app.provider('ControllerHelper', function(){
                     $state.go(detailState, pa);
                 }
 
-                InitSetCurItem();
+                $scope.CheckAll = function(isChecked) {
+                    var docs = $scope[listName];
+                    docs.forEach(function(doc){
+                        doc.isChecked = isChecked;
+                    })
+                }
+
 
                 //这里有一个严重的BUG。由于此处使用promise模式，
                 // 使得 InitLoadList和InitSetCurItem在页面的ng-init指定的函数执行以后才执行。造成数据延后，无法找到。
-                // 为了暂时避免这个问题，先执行 InitSetCurItem()
-                InitSetCurItem();
+                // 为了暂时避免这个问题，预先判断是否需要InitLoad。
+                // 但注意：这依然没有解决在InitLoad模式下的问题。
+                return InitLoad();
 
-                return $q.when()
-                    .then(InitLoadList)
-                    .then(InitSetCurItem)
-                    .catch(Errhandler);
             }
         }
     }
@@ -505,7 +538,6 @@ app.factory('BreadcrumbServ', function($state, $rootScope) {
                 }
             } 
 
-console.log(level, title, crumbs);
         }
     }
 });

@@ -4,7 +4,7 @@ var StateCreater = function(moduleDir, stateProvider) {
 
     // createStates($statePrivider, 'client', 'client')
     // createStates($statePrivider, 'client', 'client.one.address')
-    this.createStates = function(moduleName, stateRootName, controllerName, viewName) {
+    this.createStates = function(moduleName, stateRootName, controllerName, viewName, resolve) {
         // 缺省参数填补
         if (!controllerName)
             controllerName = stateRootName;
@@ -39,6 +39,8 @@ var StateCreater = function(moduleDir, stateProvider) {
             {
                 name: stateRootName,
                 url: '/' + getModelName(stateRootName),
+                resolve: resolve,
+                __ctl:  ctlName,
              },
             {
                 name: stateRootName+ '.cover',
@@ -55,6 +57,7 @@ var StateCreater = function(moduleDir, stateProvider) {
             {
                 name: stateRootName+ '.one',
                 url: '/one/:' +  modelName,// +'Id', //TODO 暂时废弃 /:_random', //这个random用来带入随机数,用以强制reload
+                __ctl:  ctlName,
             },
             {
                 name: stateRootName+ '.one.detail',
@@ -70,8 +73,10 @@ var StateCreater = function(moduleDir, stateProvider) {
             state.views = {};
             state.views[viewName] = {
                 templateUrl: tplBase  + SnakeCase(state.name, '-') + '.html',
-                 controller:  ctlName,
+                // controller:  ctlName,
+                controller: state.__ctl,
             };
+
             //这里有BUG,暂时屏蔽
             // if (state.name === stateRootName) {
             //     state.views[viewName].controller = ctlName;

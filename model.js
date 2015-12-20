@@ -43,6 +43,11 @@ var InitModelFactory = function(app) {
             var snakeName = SnakeCase(name, '-');
             var pathName = prefix + '/' + snakeName + '/:_id';
             this.rs = $resource(pathName, {}, {});
+
+            // $rootScope.rsCache: 缓存各种冲服务器Load来的数据。
+            if (!$rootScope.rsCache) 
+                $rootScope.rsCache = {};
+            
         }
 
         // 根据 pops的设置来将所有的ObjectId对象化
@@ -93,15 +98,57 @@ var InitModelFactory = function(app) {
             this._populate(model);
         };
 
-        /* filter :function;
-            用以在客户端添加过滤条件
+        // arrayName和cond共同组成的key。用于区分不同的cache list
+        RS.prototype.CondKey = function(cond) {
+            if (!cond)
+                cond = {};
+            return this.arrayName + '|' + JSON.stringify(cond);
+        };
+
+        /**
+         * Load()跟Search()的区别：
+         * Load()调用Search()从服务器上获取datas array。
+         * 但Load()将数据根据条件cache到本地，Search则不会。
+         *
+         * filter :function;
+         * 用以在客户端添加过滤条件
+         * 
+         * isFromCache: boolean,  是否优先从cachelist寻找。如果
+         *        cache list[cond]存在，则将缺省cache list指向。
+         *        否则，向服务器请求。
          */
-        RS.prototype.Load = function(cond, filter) {
+        RS.prototype.Load = function(cond, filter, isFromCache) {
             var _this = this;
+            var _an = this.arrayName;
+            var rsc = $rootScope.rsCache;
+
+            // arrayName不存在，提示开发者使用Search(),而不是Load()
+            if (!_an) {
+                throw new Error('please change to Search() if arrayName isn\'t defined in this RS.');
+            }
+            // arrayName存在，需要做一系列cache list的处理
+
+            var conKey = _this.CondKey(cond);
+
+            //直接从cache list里取出并指向
+            if (isFromCache && rsc[conKey]) {
+                $rootScope[_an] = rsc[conKey];
+                return $q.when();
+            }
+
+            //接下来向服务器发起请求
+
+            //先清空。因为Load是异步调用，用户可能先看到上次残留的数据。
+            $rootScope[_an] = [];
+            //    $rootScope[_an] = 0; //这种清除的办法可以保留原数组的引用。
+
             return _this.Search({
                 cond: cond,
                 filter: filter,
-                isDefaultList: true,
+            }).then(function(items){
+                $rootScope.rsCache[conKey] = angular.copy(items);
+                //将缺省cache list 指向当前搜索条件的cache list
+                $rootScope[_an] = rsc[conKey];
             });
         };
 
@@ -111,22 +158,16 @@ var InitModelFactory = function(app) {
         RS.prototype.Search = function(params) {
             var cond = params.cond;
             var filter = params.filter;
-            var isDefaultList = params.isDefaultList;
 
             var _this = this;
-            //先清空。因为Load是异步调用，用户可能先看到上次残留的数据。
-            if (isDefaultList && _this.arrayName) {
-                if ($rootScope[_this.arrayName])
-                    $rootScope[_this.arrayName].length = 0; //这种清除的办法可以保留原数组的引用。
-                else
-                    $rootScope[_this.arrayName] = []; 
-
-            }  
             return _this.rs.query(cond).$promise.then(function(items){
                 if (filter)
                     items = items.filter(filter);
-                if (isDefaultList && _this.arrayName)
-                    $rootScope[_this.arrayName] = items;
+                else
+                    items = angular.copy(items);
+                //注意：上述的items都重新copy了一份实例。以免与因$resource
+                // 重复使用buffer而引起冲突。
+
                 Cache.put(items);
 
                 // 从Cache里，自动_populate预设的属性。
@@ -142,6 +183,7 @@ var InitModelFactory = function(app) {
 
         RS.prototype.Save = function(model) {
             var _this = this;
+
 
             var isNew = !(model._id) || (model._id === 'new');
             if (isNew) {
@@ -181,9 +223,11 @@ var InitModelFactory = function(app) {
                 delete model.$promise;
                 delete model.$resolved;
 
-                //返回的结果是null或不能存在_id,说明返回的不是某个model对象
-                if (model._id)
+                if (model._id) {
                     _this._updateLocal(model);
+                } else {
+                    throw new Error('返回的结果是null或不能存在_id,说明返回的不是某个model对象,检查代码');
+                }
 
                 return $q.when(model);
             })
@@ -249,6 +293,9 @@ var upperFirst = function(s) {
 
 
 var DefineCommonRS = function(app, prefix, name, arrayName, pops) {
+    //经常会写错，写成一样的，很难debug出来，因此这里做个检查。
+    if (name === arrayName)
+        throw new Error('the name(' + name + ') shouldn\'t be same as arrayName');
     var rsName = upperFirst(name) + 'RS';
     app.factory(rsName, ['RS', function(RS){
         return new RS(prefix, name, arrayName, pops);

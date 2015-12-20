@@ -1,4 +1,4 @@
-console.log('module.paths: ', module.paths);
+
 var express     = require('express')
     , Q         = require('q')
     , mongoose  = require('mongoose')
@@ -23,7 +23,6 @@ exports = module.exports.Start = function() {
     log4js.configure('log4js.json', {});
     var logger = log4js.getLogger();
     logger.debug('Hello, log4js is working');
-
 
     // ------ config.init
     config.init();
