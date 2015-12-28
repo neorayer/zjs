@@ -1,7 +1,9 @@
+'use strict'
+
 var exports = exports || {};
 
 
-Clone = exports.Clone = function(src) {
+var Clone = exports.Clone = function(src) {
     var dest = {};
     ValueCopy(src, dest);
     return dest;
@@ -10,7 +12,7 @@ Clone = exports.Clone = function(src) {
 //1 只赋值属性，不复制方法。
 //2 不会循环。
 //3 不复制DOM
-ValueCopy = exports.ValueCopy = function (__src, __dest) {
+var ValueCopy = exports.ValueCopy = function (__src, __dest) {
     if (!__src)
         return;
 
@@ -71,7 +73,7 @@ ValueCopy = exports.ValueCopy = function (__src, __dest) {
 }
 
 var SNAKE_CASE_REGEXP = /[A-Z]/g;
-SnakeCase = exports.SnakeCase = function(name, separator) {
+var SnakeCase = exports.SnakeCase = function(name, separator) {
   separator = separator || '_';
   return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
     return (pos ? separator : '') + letter.toLowerCase();
@@ -79,13 +81,13 @@ SnakeCase = exports.SnakeCase = function(name, separator) {
 }
 
 // 首字母大写
-CapitalFirst = exports.CapitalFirst = function (word) {
+var CapitalFirst = exports.CapitalFirst = function (word) {
     if (word.length === 0)
         return word;
     return word.substring(0,1).toUpperCase( ) + word.substring(1);;
 }
 
-NiceTrim = exports.NiceTrim = function (obj, key) {
+var NiceTrim = exports.NiceTrim = function (obj, key) {
 
     if (!obj)
         return;
@@ -96,7 +98,7 @@ NiceTrim = exports.NiceTrim = function (obj, key) {
 }
 
 
-PurifyData = exports.PurifyData = function(data) {
+var PurifyData = exports.PurifyData = function(data) {
     for(var k in data){
         //去除所有$开头的属性
         if (k.indexOf('$') === 0) {
@@ -119,7 +121,7 @@ PurifyData = exports.PurifyData = function(data) {
 // Arguments :
 //  verb : 'GET'|'POST'
 //  target : an optional opening target (a name, or "_blank"), defaults to "_self"
-OpenWindow = exports.OpenWindow = function(verb, url, data, target) {
+var OpenWindow = exports.OpenWindow = function(verb, url, data, target) {
     var form = document.createElement("form");
     form.action = url;
     form.method = verb;
@@ -140,7 +142,7 @@ OpenWindow = exports.OpenWindow = function(verb, url, data, target) {
 
 
 //将obj对象转换成url query
-ObjectToQuery = exports.ObjectToQuery = function(obj, prefix) {
+var ObjectToQuery = exports.ObjectToQuery = function(obj, prefix) {
     if (!obj) return "";
     var str = [];
     for(var p in obj) {
@@ -155,7 +157,7 @@ ObjectToQuery = exports.ObjectToQuery = function(obj, prefix) {
 }
 
 // 抛出一个错误对象，格式为 {field: xxxx, msg: xxx, error: ....}
-ThrowError = exports.ThrowError = function(field, msg) {
+var ThrowError = exports.ThrowError = function(field, msg) {
     throw {field: field, error: new Error(msg)};
 }
 
@@ -325,7 +327,7 @@ Array.prototype.PushArray = function(items) {
 // }
 
 
-YearsArray = exports.YearsArray = function(beginY, endY) {
+var YearsArray = exports.YearsArray = function(beginY, endY) {
     var years = new Array();
     if (endY >= beginY) {
         for(var i=beginY; i<=endY; i ++) {

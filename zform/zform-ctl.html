@@ -2,20 +2,25 @@
 <div ng-if="ctl.type === 'label'" 
      class="control-label">
   <label > 
-    <span>{{ctl.text}}</span>
+    <span>{{ngModel[ctl.name] || ctl.text}}</span>
     <span ng-if="ctl.isRequired" ng-class="text-error">*</span>
   </label>
 </div>
 
-<span ng-if="ctl.type === 'text'">
-  {{ctl.text}}
+<span ng-if="ctl.type === 'text' && ctl.isInGroup">
+  {{ngModel[ctl.name] || ctl.text}}
 </span>
+
+<p ng-if="ctl.type === 'text' && !ctl.isInGroup"
+      class="form-control-static">
+  {{ngModel[ctl.name] || ctl.text}}
+</p>
 
 <button ng-if="ctl.type === 'button'"
         type="{{ctl.btnType}}"
         class="btn btn-block {{ctl.cssBtn}}  btn-raised"
         ng-click="ctl.btnClick()"
-        ng-disabled = "ctl.isDoing"
+        ng-disabled = "ctl.isDoing || ctl.isDisabled"
         >
   <i ng-if="ctl.icon" class="{{ctl.icon}}"></i>
   {{ctl.btnText}}
@@ -28,13 +33,12 @@
       {{ctl.text}} <span class="caret"></span>
     </button>
     <ul class="dropdown-menu"> 
-      <li ng-repeat="option in ctl.options">
-          <a href ng-click="ctl.onSelectItem(option)">{{ctl.getOptionLabel(option)}}</a>
+      <li ng-repeat="option in ctl.options"
+          ng-class="{divider: option === '-'}">
+          <a href ng-click="ctl.OnSelectItem(option)">{{ctl.getOptionLabel(option)}}</a>
       </li>
     </ul>
 </div>
-
-
 
 
 <!-- Editable -->

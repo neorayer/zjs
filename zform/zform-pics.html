@@ -1,3 +1,64 @@
+<style type="text/css">
+.thumb {
+  position:relative;
+  display:block;
+  float:left;
+  margin-right:4px;
+  margin-bottom:4px;
+}
+
+.thumb-size {
+  height: 80px;
+  min-width: 80px;
+  line-height: 80px;
+  text-align:center;
+}
+
+.thumb img {
+  border:2px solid #ccc;  
+}
+
+.thumb img.selected {
+  border:2px solid orange;
+}
+
+.thumb img.hover {
+  border:2px solid orange;
+}
+
+.thumb-btn {
+  background-color:white;
+  border:2px solid #ccc;
+}
+
+.topright-circle {
+  position: absolute;
+  top: -4px;
+  right: 0px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f86868;
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
+  line-height: 18px;
+  text-align: center;
+  font-size: 8px; 
+}
+
+.topright-circle .fa {
+  line-height:18px;
+}
+
+.topright-circle a {
+  color: black;
+}
+
+.topright-circle a:hover {
+  color: white;
+}
+</style>
+
 <div class="clearfix">
   <div ng-show="!def.isViewOnly" class="thumb">
   <a  
@@ -8,7 +69,7 @@
     {{btnText}}
   </a>
   <div class="thumb thumb-size"
-       ng-repeat="pic in def.ngModel[def.name]" href
+       ng-repeat="pic in ngModel[def.name]" href
        ng-mouseover="Mouseover(pic)"
        ng-mouseleave="Mouseleave(pic)"
        ng-click="Select(pic)">

@@ -1,3 +1,4 @@
+'use strict'
 
 var Errhandler = function(err){
     console.error(err);
