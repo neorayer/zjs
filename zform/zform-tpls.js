@@ -54,9 +54,7 @@ tpls['text'] = `
 `;
 
 tpls['html'] = `
-<div 
-     ng-bind-html="def.html">
-</div>
+<div ng-bind-html="def.html"> </div>
 `;
 
 tpls['link'] = `
@@ -196,12 +194,14 @@ tpls['radio-buttons'] = `
 <div 
      class="btn-group">
   <label ng-repeat="option in def.options"
-         btn-radio="option.value"
+         uib-btn-radio="option.value"
          ng-disabled="disabled"
          uib-tooltip="{{option.tip}}"
          class="btn {{def.btnClass||'btn-default'}}"
+         ng-class="{active: ngModel[def.name] === option.value}"
          ng-model="ngModel[def.name]">
-      {{option.label|translate}}
+    <span ng-if="!option.isHtml" ng-bind="option.label|translate"></span>
+    <span ng-if="option.isHtml" ng-bind-html="option.label|translate"></span>
   </label>
 </div>
 `;
@@ -228,9 +228,10 @@ tpls['ui-select'] = `
            on-select="def.onSelect($item,$model)"
            theme="bootstrap">
   <ui-select-match placeholder="{{def.placeholder}}">
-    {{getSelectedLabel($select.selected)}}
+    <div ng-bind="getSelectedLabel($select.selected)"></div>
   </ui-select-match>
-  <ui-select-choices repeat="getOptionValue(option) as option in def.options|filter:$select.search">
+  <ui-select-choices repeat="getOptionValue(option) as option in def.options|filter:$select.search"
+                     ui-disable-choice="def.isOptionDisable(option)">
     <div ng-bind-html="getOptionLabel(option)"></div>
   </ui-select-choices>
 </ui-select>
@@ -241,6 +242,31 @@ tpls['text-angular'] = `
               ng-model="ngModel[def.name]"
               ng-disabled="disabled"></text-angular>
 `;
+
+tpls['uib-datepicker'] = `
+  <p class="input-group">
+    <input type="text" 
+           class="form-control" 
+           uib-datepicker-popup="{{def.format}}"
+           ng-model="ngModel[def.name]" 
+           is-open="def.isOpen"
+           show-button-bar="def.showButtonBar"
+           current-text="{{def.currentText}}"
+           clear-text="{{def.clearText}}"
+           close-text="{{def.closeText}}"
+           datepicker-options="def"/>
+    <span class="input-group-btn">
+      <button type="button" 
+              class="btn btn-default" 
+              ng-click="def.isOpen = !def.isOpen">
+        <i class="glyphicon glyphicon-calendar"></i>
+      </button>
+    </span>
+  </p>
+`;
+
+
+
 
 tpls['zform-error'] = `
 <zform-error ng-if="!isInGroup && isEdit" name="def.name"></zform-error>

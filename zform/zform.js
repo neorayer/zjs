@@ -71,7 +71,8 @@ app.directive('zformRow', function(){
     }
 
     Di.template = `
-        <div class="form-group {{def.rowClass}}">
+        <div class="form-group {{def.rowClass}}"
+             ng-hide="def.isHidden(ngModel)">
             <div zform-col="colDef" 
                  ng-repeat="colDef in colDefs track by $index"
                  ng-model="ngModel"
@@ -97,6 +98,8 @@ app.directive('zformRow', function(){
 
         $scope.colDefs = [];
 
+        if (!cols)
+            throw new Error('def.cols is required by <zform-row>');
         // get a new copy of rowDef to colDefs[] 
         for (var i=0,len=cols.length; i<len; i++) {
             // extend string col to object[el.label]
@@ -304,7 +307,7 @@ app.directive('zformIngrp', function($rootScope){
     // Notice: def.left and def.right are replaced by $scope.defLeft and $scope.defRight
     Di.template =  ' \
         <div class="input-group">  \
-            <zform-edit ng-if="def.left" ng-model="ngModel" def="defLeft" class="{{defLleft.class}}" ></zform-edit> \
+            <zform-edit ng-if="def.left" ng-model="ngModel" def="defLeft" class="{{defLeft.class}}" ></zform-edit> \
             <zform-edit ng-if="def.input" ng-model="ngModel" def="def.input"></zform-edit> \
             <zform-edit ng-if="def.right" ng-model="ngModel" def="defRight" class="{{defRight.class}}"></zform-edit> \
         </div>  \
@@ -320,6 +323,11 @@ app.directive('zformIngrp', function($rootScope){
             throw new Error('def is required by <zform-ingrp>');
 
         var def = $scope.def;
+
+        if (!def.input)
+            throw new Error('def.input is required by <zform-ingrp>');
+
+        def.input.el = def.input.el || 'input';
 
         // We need replace def.left and def.right by Object defLeft or defRight
         // because they may by string.
@@ -338,7 +346,6 @@ app.directive('zformIngrp', function($rootScope){
 
         angular.forEach([$scope.defLeft, $scope.defRight], function(lrDef){
             if (!lrDef) return;
-
             switch (lrDef.el) {
                 case 'text':
                     lrDef.class = 'input-group-addon';
@@ -349,6 +356,7 @@ app.directive('zformIngrp', function($rootScope){
                     break;
             }
         });
+
     }
 
     return Di;
@@ -402,15 +410,15 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
         if (el.parent().hasClass('input-group'))
             edit.setInGroup(true);
 
-
-        $compile(tpls[$scope.def.el])($scope, function(cloned, scope){
+        var tplHtml = tpls[$scope.def.el];
+        if (!tplHtml)
+            throw new Error('no such template (for el=' + $scope.def.el + ') for <zform-edit>, def=' + JSON.stringify($scope.def));
+        $compile(tplHtml)($scope, function(cloned, scope){
             iElm.append(cloned);
         });
-
-
-
-
-
+        $compile(tpls['zform-error'])($scope, function(cloned, scope){
+            iElm.append(cloned);
+        });
 
         var insertValidators = function() {
             if (angular.isArray(edit.def.validators))
@@ -441,21 +449,29 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
         if (!$scope.def)
             throw new Error('def is required by <zform-edit>');
         var _this = this;
+
+        // save the orginal $scope.def, for debugging
+        var oldDef = angular.copy($scope.def);
+
         // trans 'def:string' to 'def:{text : xxxxxx }'
         var def = _this.def =  angular.isString($scope.def) ? 
                         { text: $scope.def } : $scope.def;
 
-
-        $scope.el        = def.el        || 'label';
-        $scope.text      = def.text      || '';
-        $scope.disabled  = def.isDisabled;
-        $scope.doingText = def.doingText || 'Waiting...';
+        def.el        = def.el   || 'label';
 
         var editEls = [ 'input', 'select', 'ui-select', 'checkbox', 'radio', 'radio-buttons', 'textarea', 'checkboxs'];
         _this.isEdit = $scope.isEdit = editEls.includes(def.el);
 
         if (_this.isEdit && !def.name)
-            throw new Error('def.name is required by an editable ctrl');
+            throw new Error('def.name is required by an editable ctrl, def=' + JSON.stringify(oldDef));
+
+        def.text      = def.text || '';
+        def.doingText = def.doingText || 'Waiting...';
+
+        $scope.el        = def.el;
+        $scope.text      = def.text;
+        $scope.disabled  = def.isDisabled;
+        $scope.doingText = def.doingText;
 
         var form;
         this.setForm = function(fm) {
