@@ -8,17 +8,6 @@ var app = angular.module('zjsdemo', [
         'zform']);
 
 app.config(function($translateProvider) {
-    $translateProvider.translations('en', {
-    });
-    $translateProvider.translations('cn', {
-        'New' : '全新',
-        'Old' : '二手',
-        'Youth' : '青年(18-40周岁)',
-        'Middle age' : '中年（40-60周岁）',
-        'Old age' : '老年（60周岁以上）',
-        'Children' : '儿童',
-    });
-
     $translateProvider.preferredLanguage('cn');
 });
 
