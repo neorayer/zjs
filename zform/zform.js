@@ -362,17 +362,6 @@ app.directive('zformIngrp', function($rootScope){
     return Di;
 });
 
-app.directive('dynAttr', function() {
-    return {
-        scope: { dynAttr: '=' },
-        link: function(scope, elem, attrs){
-            for(var key in scope.dynAttr){
-                elem.attr(key, scope.dynAttr[key]);   
-            }
-        }
-    };
-});
-
 /**
  * optionLabel:   how to show the option label
  *      string,          // the property name of label
@@ -607,8 +596,6 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
 
     return Di;
 }); // directive('zformEdit')
-
-
 
 
 app.directive('zformPics', function($timeout){
