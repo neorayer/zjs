@@ -17,7 +17,8 @@ app.config(function($translateProvider) {
     $translateProvider.translations('cn', {
         'VALIDATE_required': '必填',
         'VALIDATE_mobile': '手机号格式不正确',
-        'VALIDATE_email': '电子邮件格式',
+        'VALIDATE_email': '电子邮件格式不正确',
+        'VALIDATE_minlength': '长度不足',
     });
 
     $translateProvider.preferredLanguage('cn');
@@ -54,6 +55,94 @@ app.service('VLDT', function(){
     
 });
 
+app.service('zformServ', function(){
+    var se = {};
+
+    se.handleServerErr = function(form, err) { // form is formController
+        var sErr = form.$serverError;
+        for (var k in sErr) {
+            delete sErr[k];
+        }
+
+        if (err ) {
+            if (err.data) {
+                if (err.data.field) {
+                    sErr[err.data.field] = err.data.msg; 
+                }else {
+                    sErr['_global'] = err.data;
+                    console.error(sErr['_global']);
+                }
+            }else {
+                sErr['_global'] = err;
+                console.error(sErr['_global']);
+            }
+        }
+    }
+
+    return se;
+});
+
+app.directive('zformError', function($rootScope){
+    var Di = {
+        restrict: 'E',
+        replace: true,
+        scope: {
+            name: '=',
+        },
+        require: ['zformError', '^form'],
+    }
+
+    Di.template = '\
+        <ul ng-show="hasError()" class="help-block" > \
+            <li ng-repeat="(key, value) in form[name].$error" ng-if="value"> \
+                {{("VALIDATE_" + key)|translate}} \
+            </li> \
+            <li ng-if="form.$serverError[name]">{{form.$serverError[name]}}</li> \
+        </ul> \
+    ';
+
+    Di.link = function($scope, iElm, iAttrs, controller) {
+        var ctrl = controller[0];
+        var form = controller[1];
+
+        ctrl.setForm(form);
+    }
+
+    Di.controller = function($scope) {
+        var _this = this;
+        if (!$scope.name)
+            throw new Error('name is required by <zform-error>.' );
+
+        this.setForm = function(form) {
+            $scope.form = form;
+            // add array $serverError to form properties at the firt time.
+            // $ is required for letting form validate to ignore it.
+            if (!form.$serverError)
+                form.$serverError = {};
+
+        }
+
+        $scope.hasError = function() {
+            if ($scope.form[$scope.name]) { // sometime hasError runs before subCtrol created.
+                var err = $scope.form[$scope.name].$error;
+                for (var k in err) {
+                    if (err[k])
+                        return true;
+                }
+            }
+
+            if ($scope.form.$serverError[$scope.name])
+                return true;
+
+            return false;
+        }
+
+    }
+
+    return Di;
+})
+
+
 /**
  * <div zform-row="rowDef" ng-model="XXX"></div>
  * rowDef {
@@ -73,15 +162,15 @@ app.directive('zformRow', function(){
         replace: true,
     }
 
-    Di.template = `
-        <div class="form-group {{def.rowClass}}"
-             ng-hide="def.isHidden(ngModel)">
-            <div zform-col="colDef" 
-                 ng-repeat="colDef in colDefs track by $index"
-                 ng-model="ngModel"
-                 ></div>
-        </div>
-    `;
+    Di.template = '\
+        <div class="form-group {{def.rowClass}}" \
+             ng-hide="def.isHidden(ngModel)"> \
+            <div zform-col="colDef"  \
+                 ng-repeat="colDef in colDefs track by $index" \
+                 ng-model="ngModel" \
+                 ></div> \
+        </div> \
+    ';
 
     Di.link = function($scope, iElm, iAttrs, controller) {
     }
@@ -106,8 +195,14 @@ app.directive('zformRow', function(){
         // get a new copy of rowDef to colDefs[] 
         for (var i=0,len=cols.length; i<len; i++) {
             // extend string col to object[el.label]
-            if (angular.isString(cols[i]))
-                cols[i] = {el: 'label', text: cols[i]};
+            if (angular.isString(cols[i])) {
+                // string col will be extended to {el: 'label'} if at the first.
+                // string col will be extended to {el: 'text'} if not at the first.
+                if (i === 0)
+                    cols[i] = {el: 'label', text: cols[i]};
+                else
+                    cols[i] = {el: 'text', text: cols[i]};
+            }
             $scope.colDefs.push(cols[i]);
         }
 
@@ -220,6 +315,7 @@ app.directive('zformShowError', function($rootScope){
             el.toggleClass('has-error', hasErrorAndBlured);
         })
         
+
     };
 
     Di.controller = function($scope) {
@@ -241,6 +337,8 @@ app.directive('zformShowError', function($rootScope){
                     continue;
                 if (field.$invalid) // && !field.$pristine )
                     return true;
+                if (_this.form.$serverError && _this.form.$serverError[edits[i].def.name])
+                    return true;
             }
             return false;
         }
@@ -257,46 +355,6 @@ app.directive('zformShowError', function($rootScope){
 
     return Di;
 });
-
-app.directive('zformError', function($rootScope){
-    var Di = {
-        restrict: 'E',
-        replace: true,
-        scope: {
-            name: '=',
-        },
-        require: ['zformError', '^form'],
-    }
-
-    Di.template = `
-        <ul class="help-block" >
-            <li ng-repeat="(key, value) in form[name].$error" ng-if="value">
-                {{('VALIDATE_' + key)|translate}}
-            </li>
-        </ul>
-    `;
-
-    Di.link = function($scope, iElm, iAttrs, controller) {
-        var ctrl = controller[0];
-        var form = controller[1];
-
-        ctrl.setForm(form);
-    }
-
-    Di.controller = function($scope) {
-        var _this = this;
-        if (!$scope.name)
-            throw new Error('name is required by <zform-error>.' );
-
-        this.setForm = function(form) {
-            $scope.form = form;
-        }
-
-    }
-
-    return Di;
-})
-
 
 app.directive('zformIngrp', function($rootScope){
     var Di = {
@@ -430,11 +488,44 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
         }
 
         if (edit.isEdit) {
-            showError.addEdit(edit);
+            if (showError)
+                showError.addEdit(edit);
             // $timeout is for waiting the form[fieldname] is built.
             $timeout(insertValidators, 1);
             $timeout(transSetBluredToFormInput, 1);
         }
+
+
+        // Extend form controller
+        //    form.$zform_validate
+        if (!form.$zform_validate) {
+            form.$zform_validate = function(){
+                angular.forEach(form, function(subCtrl, key){
+                    if (key.indexOf('$') === 0)
+                        return;
+                    // force to validate
+                    subCtrl.$validate();
+                    // set blured: ref to  transSetBluredToFormInput()
+                    if (subCtrl.setBlured)
+                        subCtrl.setBlured(true);
+                })
+            };
+        }
+        //    form.$zform_setBlured
+        if (!form.$zform_setBlured) {
+            form.$zform_setBlured = function(isBlured) {
+                angular.forEach(form, function(subCtrl, key){
+                    if (key.indexOf('$') === 0)
+                        return;
+                    if (subCtrl.setBlured)
+                        subCtrl.setBlured(isBlured);
+                });
+            }
+        }
+        //    form.$zform_reset
+        if (!form.$zform_reset)
+            form.$zform_reset = form.$zform_setBlured;
+
     }
 
     Di.controller = function($scope) {
@@ -452,7 +543,7 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
         def.el        = def.el   || 'label';
 
         var editEls = [ 'input', 'select', 'ui-select', 'checkbox', 'radio', 'radio-buttons', 'textarea', 'checkboxs'];
-        _this.isEdit = $scope.isEdit = editEls.includes(def.el);
+        _this.isEdit = $scope.isEdit = editEls.indexOf(def.el) >= 0;
 
         if (_this.isEdit && !def.name)
             throw new Error('def.name is required by an editable ctrl, def=' + JSON.stringify(oldDef));
@@ -482,8 +573,8 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
         $scope.getText = function() {
             if (angular.isFunction(def.text)) 
                 return def.text($scope.ngModel);
-            if (def.text)
-                return def.text;
+            if ($scope.text)
+                return $scope.text;
             if ($scope.ngModel && def.name)
                 return $scope.ngModel[def.name];
         }
@@ -501,11 +592,23 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
                     return labelDef(v);
             }
             //default
-            if (angular.isString(v))
+            if (angular.isString(v) || angular.isNumber(v))
                 return v;
 
             return JSON.stringify(v);
         }
+
+        // var initOptions = function() {
+        //     if (angular.isArray(def.options)) {
+        //         for (let i=0, len=def.options.length; i< len; i++) {
+        //             var option = def.options[i];
+        //             // extends string option to object {label: xxxx, value: xxx}
+        //             if (angular.isString(option))
+        //                 def.options[i] = {label: option, value: option};
+        //         }
+        //     };
+        // }
+        // initOptions();
 
         $scope.getSelectedLabel = function(v) { 
             return getLabel(def.selectedLabel || def.optionLabel, v); 
@@ -533,17 +636,8 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
         $scope.onClick = function() {
             // check the form valid, while submit
             if (def.type === 'submit') {
-                angular.forEach(form, function(subCtrl, key){
-                    if (key.indexOf('$') === 0)
-                        return;
-                    // force to validate
-                    subCtrl.$validate();
-                    // set blured: ref to  transSetBluredToFormInput()
-                    if (subCtrl.setBlured)
-                        subCtrl.setBlured(true);
-                    else
-                        console.log(key);
-                })
+                form.$zform_validate();
+
                 if (_this.form.$invalid) {
                     console.log('the form is invalid')
                     return;
@@ -563,7 +657,7 @@ app.directive('zformEdit', function($compile, $timeout, tpls){
             if (def.onClick) {
                 prepare();
                 def.onClick(recover, $scope.ngModel);
-            }
+            } 
         } // onClick()
 
         if (def.el === 'checkboxs') {
@@ -620,7 +714,7 @@ app.directive('zformPics', function($timeout){
         var def = $scope.def = $scope.zformPics;
         $scope.ngModel[def.name] = $scope.ngModel[def.name] || [];
 
-        $scope.onSelect = def.OnSelect || function() {};
+        $scope.onSelected = def.onSelected || function() {};
 
         $scope.picHovered = null; 
         $scope.picSelected = null;
@@ -629,7 +723,7 @@ app.directive('zformPics', function($timeout){
             if ($scope.IsSelected(pic))
                 return;
             $scope.picSelected = pic;
-            $scope.onSelect(pic);
+            $scope.onSelected(pic);
         }
 
         $scope.Mouseover = function(pic) {
@@ -657,14 +751,14 @@ app.directive('zformPics', function($timeout){
             throw new Error('qiniu is required by the def of <div zform-pics="def">');
 
         //注意！！！后面的代码都是跟upload有关的！
-        $scope.onDelete = def.OnDelete || function() {};
-        $scope.onAdded  = def.OnAdded  || function() {};
+        $scope.onDeleted = def.onDeleted || function() {};
+        $scope.onAdded  = def.onAdded  || function() {};
         $scope.btnText  = def.text || '+上传图片';
         $scope.doingText = def.doingText || '正在上传';
         def.qiniu.thumbUrlQuery = def.qiniu.thumbUrlQuery || '?imageView2/1/w/180/h/180/q/77/format/jpg';
         $scope.ClickDelete = function(pic) {
             $scope.ngModel[def.name].Delete(pic);
-            $scope.onDelete(pic);
+            $scope.onDeleted(pic);
         }
 
         var uploader = Qiniu.uploader({
@@ -760,6 +854,81 @@ app.directive('zformPics', function($timeout){
 
     return Di;
 }); // directive('zformPics')
+
+
+
+
+
+app.directive('qiniuUploader', function($timeout){
+    var Di = {
+        restrict: 'A',
+        scope: {
+            qiniuUploader: '=',
+            ngModel: '=',
+        },
+        require: ['qiniuUploader'],
+
+    }
+
+    Di.link = function($scope, iElm, iAttrs, controller) {
+       var def = $scope.qiniuUploader;
+        if (!def)
+            throw new Error('def is required by qiniu-uploader');
+        if (!def.onUploaded)
+            throw new Error('def.onUploaded is required by qiniu-uploader');
+        if (!iAttrs.id)
+            throw new Error('attribute id is required by <a id="XXX" qiniu-uploader="def">ABC<a>');
+        var uploader = Qiniu.uploader({
+            runtimes: def.runtimes || 'html5,flash,html4',   
+            browse_button: iAttrs.id, 
+            uptoken_url: def.uptoken_url,
+            unique_names: true, 
+            domain: def.domain,
+            max_file_size: def.max_file_size || '100mb',
+            flash_swf_url: def.flash_swf_url || 'js/plupload/Moxie.swf',
+            max_retries: def.max_retries || 3,
+            dragdrop: false,
+            drop_element: 'container',  
+            chunk_size: '4mb',
+            auto_start: true, 
+            init: {
+                FilesAdded: function(up, files) {
+                    plupload.each(files, function(file) {
+                        $timeout(function(){
+                            //PreUploadFile(file)
+                        }, 10);
+                    });
+                },
+                BeforeUpload: function(up, file) {
+                },
+                UploadProgress: function(up, file) {
+                },
+                FileUploaded: function(up, file, info) {
+                     var domain = up.getOption('domain');
+                    var res = JSON.parse(info);
+                    var url = domain + res.key; 
+                    $timeout(function(){
+                        def.onUploaded(url, file);
+                    }, 1);
+                },
+                Error: function(up, err, errTip) {
+                },
+                UploadComplete: function() {
+                },
+                Key: function(up, file) {
+                }
+            }
+
+        });
+    }
+
+    Di.controller = function($scope) {
+    } // Di.controller
+
+    return Di;
+}); // directive('qiniuUploader')
+
+
 
 
 

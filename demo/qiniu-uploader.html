@@ -39,7 +39,7 @@
 <script src="/zjs/zform/zform.js"></script>
 <script src="/zjs/zform/zform-tpls.js"></script>
 
-<script src="/zjs/demo/taobao-form.js"></script>
+<script src="/zjs/demo/qiniu-uploader.js"></script>
 
 
 <style type="text/css">
@@ -83,73 +83,8 @@ $.material.init();
 <div class="container-fluid"  
      ng-controller="ProductController">
 
-  <div class="row">
-    <div class="col-sm-offset-2 col-sm-8">
-      <form name="testForm" novalidate class="form-horizontal" >
-        <fieldset>
-          <legend>1. 基本信息</legend>
-       
+<a id="uploaderBtn" class="btn btn-primary" qiniu-uploader="btnDef">上传</a>
 
-          <div ng-repeat="row in rows1" 
-               zform-row="row" 
-               ng-model="formProduct" 
-               ng-if="!row.ngIf || row.ngIf()"></div>
-
-          
-
-          <div class="form-group">
-            <div class="col-sm-3 control-label">
-              <label>宝贝图片</label>
-            </div>
-            <div class="col-sm-9">
-              <uib-tabset>
-                <uib-tab heading="本地上传">
-                  <div zform-pics="cols.pictures" ng-model="formProduct"></div>
-                </uib-tab>
-                <uib-tab select="alertMe()">
-                  <uib-tab-heading>
-                    <i class="fa fa-home"></i>图片空间
-                  </uib-tab-heading>
-                  I've got an HTML heading, and a select callback. Pretty cool!
-                </uib-tab>
-              </uib-tabset>              
-            </div>
-          </div>
-
-          <div zform-row="['宝贝描述', cols.desc]" ng-model="formProduct"></div>
-        </fieldset> 
-
-        <fieldset>
-          <legend>2. 物流信息</legend>
-          <div ng-repeat="row in rows2" 
-               zform-row="row" 
-               ng-model="formProduct" 
-               ng-if="!row.ngIf || row.ngIf()"></div>
-        </fieldset>
-
-        <fieldset>
-          <legend>3. 售后保障信息</legend>
-          <div ng-repeat="row in rows3" 
-               zform-row="row" 
-               ng-model="formProduct" 
-               ng-if="!row.ngIf || row.ngIf()"></div>
-        </fieldset>
-
-        <fieldset>
-          <legend>4. 其他信息</legend>
-          <div ng-repeat="row in rows4" 
-               zform-row="row" 
-               ng-model="formProduct" 
-               ng-if="!row.ngIf || row.ngIf()"></div>
-        </fieldset>
-
-        <fieldset class="navbar navbar-default navbar-fixed-bottom">
-          <div zform-row="['', '', cols.submit, '']"></div>
-        </fieldset>
-      </form>
-    </div>
-  </div>
-<pre>
 {{formProduct|json}}
 </pre>
 </div>
