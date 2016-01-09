@@ -1,104 +1,5 @@
 'use strict'
 
-var Errhandler = function(err){
-    console.error(err);
-    if (err.data) {
-        if (err.data.msg) {
-            alert(err.data.msg);
-        }else {
-            alert(err.data);
-        }
-    }else {
-        alert(err);
-    }
-}
-
-
-app.factory('ImageServ', function() {
-    var instance = {
-
-        // size: 'lg', 'nm', 'sm', 'xs', {default: 'nm'}
-        productCoverCssImage : function(product, size) { 
-            size = size || 'nm';
-
-            var url = '/imgresource/sys/default-product-cover.png';
-
-            if (product && product.pictures && product.pictures.length > 0)
-                url = product.pictures[0].url;
-
-            var style = {
-                backgroundImage: "url('" + url + "')", 
-                backgroundSize: "100% 100%",
-                backgroundRepeat: "no-repeat",
-                border: "1px solid #ccc",
-            }
-
-            switch(size) {
-                case 'xs':
-                    style.width = "32px";
-                    style.height = "32px";
-                    break;
-                default:
-                    style.width = "80px";
-                    style.height = "80px";
-                    break;
-            }
-
-            return style;
-        },
-
-        productUrl: function(product, size) {
-            size = size || 'nm';
-            var url = '/imgresource/sys/default-product-cover.png';
-            if (product && product.pictures && product.pictures.length > 0)
-                url = product.pictures[0].url;
-            return url;
-        },
-
-        pictureUrl: function(picture, size) {
-            size = size || 'nm';
-            return picture.url;
-            // TODO size 暂时没用
-        },
-
-        productUrls: function(product, size) {
-            // TODO size暂时没用
-            size = size || 'nm';
-            var urls = [];
-            if (product && product.pictures && product.pictures.length > 0) {
-                return product.pictures.map(function(pic){
-                    return pic.url;
-                })
-            }
-            return urls;
-        },
-
-        warehouseUrl: function(warehouse) {
-            var url = '/public/kanga/devices/ph/img/city-logo.jpg';
-            if (warehouse.type === 'transit')
-                url = '/public/kanga/devices/ph/img/transit.png';
-            return url;
-        },
-
-        storeTypeLogoUrl: function(store) {
-            switch(store.storeType) {
-                case 'vdian':
-                    return '/public/kanga/devices/ph/img/vdian-logo.jpg';
-                case 'taobao':
-                    return '/public/kanga/devices/ph/img/taobao-logo.png';
-                default:
-                    return 'none';
-            }
-        }
-    }
-
-    return instance;
-})
-
-
-app.run(function($rootScope, ImageServ){
-    $rootScope.ImageServ = ImageServ;
-})
 
 //////////////////////////////////////////
 
@@ -381,8 +282,6 @@ app.factory('DateServ', function() {
 });
 
 app.factory('Dict', function($rootScope) {
-
-
     var CreateDict = function(dictName, items) {
         if (!$rootScope.dictionaries)
             $rootScope.dictionaries = {};
@@ -394,24 +293,6 @@ app.factory('Dict', function($rootScope) {
             itemMap[item.k] = item.v;
         });
     };
-
-    // Init
-    var Init = function() {
-
-        CreateDict('ClientType', [
-            {k: 'Supplier', v: '供应商'},
-            {k: 'Client', v: '客户'},
-            {k: 'Other', v: '其他'},
-        ]);
-        CreateDict('LogiType', [
-            {k: 'agent', v: '货运代理'},
-            {k: 'logistics', v: '跨国货运公司'},
-            {k: 'local', v: '同城快递'},
-            {k: 'national', v: '国内快递'},
-        ]);
-    };
-
-    Init();
 
     return {
         CreateDict: CreateDict,
@@ -516,37 +397,6 @@ app.factory('FileTypeServ', function($rootScope) {
 app.run(function($rootScope, FileTypeServ){
     $rootScope.FileTypeServ = FileTypeServ;
 })
-
-
-
-
-app.factory('BreadcrumbServ', function($state, $rootScope) {
-    return {
-        Set: function(level, title) {
-
-            $rootScope.breadcrumbs[level] = {
-                level: level,
-                title: title,
-                srefTo: $state.current.name,
-                srefParams: $state.params,
-            };
-            var crumbs = $rootScope.breadcrumbs;
-            // 清除下面级别，已经无效的crumbs
-            for(var i=0,len=crumbs.length; i<len; i++) {
-                 if (i > level) {
-                    crumbs[i] = null;
-                }
-            } 
-
-        }
-    }
-});
-
-app.run(function($rootScope, BreadcrumbServ){
-    $rootScope.breadcrumbs = [];
-    $rootScope.BreadcrumbServ = BreadcrumbServ;
-});
-
 
 
 //转换成友好的尺寸格式
