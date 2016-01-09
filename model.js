@@ -6,15 +6,28 @@ var InitModelFactory = function(app) {
             $rootScope.___rsCacheItems = [];
         var items = $rootScope.___rsCacheItems;
         var cache = {};
+
+        var putOne = function(v) {
+            if (!cache[v._id]) {
+                cache[v._id] = v;
+            } else {
+                var doc = cache[v._id];
+                for(var k in doc)
+                    delete doc[k];
+                angular.copy(v, doc);
+            }
+        }
+
         cache.put = function(v) {
             if (v.constructor === Array) {
                 v.forEach(function(model){
-                    cache[model._id] = model;
+                    putOne(model);
                 })
             }else {
-                cache[v._id] = v;
+                putOne(v);
             }
         }
+
 
         cache.get = function(id) {
             return cache[id];
@@ -168,13 +181,13 @@ var InitModelFactory = function(app) {
                 //注意：上述的items都重新copy了一份实例。以免与因$resource
                 // 重复使用buffer而引起冲突。
 
-                Cache.put(items);
-
                 // 从Cache里，自动_populate预设的属性。
                 // 因此，初始化Load()的顺序非常重要。否则可能无法_populate。
                 items.forEach(function(item){
                     _this._populate(item);
                 });
+                
+                Cache.put(items);
 
                 return items;
             });
@@ -204,14 +217,14 @@ var InitModelFactory = function(app) {
                     if (!model[pop]) { 
                         // 为undefined时
                         return;
-                    } else if (typeof model[pop] === 'string') {
-                        // 为string时
-                        model[pop] = model[pop]['ObjectId'];
+                    } else if (!angular.isString(model[pop])) {
+                        // 属性是Object, 不是sting, 说明需要un populate
+                        model[pop] = model[pop]['_id'];
                     }else if (model[pop].constructor === Array) {
                         // 为array时
                         var values = [];
                         model[pop].forEach(function(obj){
-                            values.push(obj['ObjectId']);
+                            values.push(obj['_id']);
                         });
                         model[pop] = values;
                     }

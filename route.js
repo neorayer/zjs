@@ -57,7 +57,6 @@ var StateCreater = function(moduleDir, stateProvider) {
             {
                 name: stateRootName+ '.one',
                 url: '/one/:' +  modelName,// +'Id', //TODO 暂时废弃 /:_random', //这个random用来带入随机数,用以强制reload
-                __ctl:  ctlName,
             },
             {
                 name: stateRootName+ '.one.detail',
@@ -66,6 +65,7 @@ var StateCreater = function(moduleDir, stateProvider) {
             {
                 name: stateRootName+ '.one.edit',
                 url: '/edit',
+                __ctl:  ctlName,
             },
         ];
 
@@ -73,14 +73,17 @@ var StateCreater = function(moduleDir, stateProvider) {
             state.views = {};
             state.views[viewName] = {
                 templateUrl: tplBase  + SnakeCase(state.name, '-') + '.html',
-                // controller:  ctlName,
-                controller: state.__ctl,
+                controller:  ctlName,
+                //这里始终有问题的
+                //controller: state.__ctl,
             };
 
             //这里有BUG,暂时屏蔽
             // if (state.name === stateRootName) {
             //     state.views[viewName].controller = ctlName;
             // };
+            // 注：这里非常非常矛盾啊。如果每个view 用一个Controller，则同一个controller要运行很多次。
+            // 否则$scope $state又会有问题
 
             stateProvider.state(state);
         })

@@ -103,17 +103,17 @@ app.run(function($rootScope, ImageServ){
 //////////////////////////////////////////
 
 app.provider('Dialogs', function() {
-    this.$get = function($modal) {
+    this.$get = function($uibModal) {
         return {
             Confirm: function(content, title) {
-                var win = $modal.open({
+                var win = $uibModal.open({
                     templateUrl: '/zjs/tpls/dialog-confirm.html',
-                    controller: function($scope, $modalInstance, params) {
+                    controller: function($scope, $uibModalInstance, params) {
                         $scope.title = params.title || '确认';
                         $scope.content = params.content;
 
                         $scope.Close = function(isYes) {
-                            $modalInstance.close(isYes);
+                            $uibModalInstance.close(isYes);
                         }
                     },
                     resolve: {
@@ -129,18 +129,18 @@ app.provider('Dialogs', function() {
             },
 
             Form: function(scope, params) {
-                var win = $modal.open({
+                var win = $uibModal.open({
                     templateUrl: '/zjs/tpls/dialog-form.html',
-                    controller: function($scope, $modalInstance, params) {
+                    controller: function($scope, $uibModalInstance, params) {
                         angular.extend($scope, params);
 
                         $scope.Close = function(isYes) {
                             if (isYes) {
                                 $scope.Confirm().then(function(){
-                                    $modalInstance.close(isYes);
+                                    $uibModalInstance.close(isYes);
                                 }, Errhandler);
                             }else {
-                                $modalInstance.close(isYes);
+                                $uibModalInstance.close(isYes);
                             }
                         }
                     },
@@ -164,40 +164,23 @@ app.provider('ControllerHelper', function(){
     this.$get = function($rootScope, $state, $timeout, $q, Cache, Dialogs) {
         return {
 
-            // if (!$scope.suppliers) {
-            //     $scope.suppliers = [];
-            //     SupplierRS.Load().then(function(suppliers){
-            //         $scope.suppliers = suppliers;
-            //     });
-            // }
+            Init: function(_params) {
+                var $scope      = _params.scope,
+                    modelLabel  = _params.modelLabel,
+                    mn          = _params.modelName,
+                    rs          = _params.rs,
+                    restricts   = _params.restricts,
+                    stateHead   = _params.stateHead ? _params.stateHead + '.' : '',
+                    newTpl      = _params.newTpl || {_id: 'new'},  // the new model template
+                    listName    = mn + 's',                        // suppliers
+                    formModelName = 'form' + CapitalFirst(mn),  //formSupplier
+                ____;
 
-            // $scope.formSupplier = {};
+                $scope.$state = $state;
 
-            // if ($state.params.supplier && $state.params.supplier !== 'new') {
-            //     $scope.supplier = Cache.get($state.params.supplier);
-            //     $scope.formSupplier = angular.copy($scope.supplier);
-            // }
-
-            // Usage:
-            //  ControllerHelper.Init($scope, 'supplier', SupplierRS)
-            //  ControllerHelper.Init($scope, 'user', SupplierRS, 'company')
-            //  以下变量将生成：
-            //      $scope.suppliers : [];
-            //      $scope.formSupplier : Object;
-            //      $scope.supplier : Object;
-            Init: function($scope, controller, modelLabel/* model label */, mn /* model name */, rs, restricts, stateHead) {
-
-//                var serv = StdServProvider.GetServ($scope, controller, modelLabel, mn, rs, restricts, stateHead);
-                //用于zform，服务端验证的model
-                $scope.serverErrors = {};
-
-                var listName = mn + 's';                        // suppliers
-                var formModelName = 'form' + CapitalFirst(mn);  //formSupplier
-                var idName = mn;                                // supplier
-                if (stateHead)
-                    stateHead = stateHead + '.';
-                else
-                    stateHead = '';
+                newTpl._id = 'new';
+                // 初始化创建 formXXXX对象
+                $scope[formModelName] = $scope[formModelName] || angular.copy(newTpl);
 
                 //约束条件。比如是某个company下的user。则需要限定company(_id)。
                 var rstCondition = {};
@@ -212,8 +195,7 @@ app.provider('ControllerHelper', function(){
                 var listState   = stateHead + 'list';
                 var detailState = stateHead + 'one.detail';
 
-                var condKey = rs.CondKey(rstCondition);
-
+                //var condKey = rs.CondKey(rstCondition);
                 var InitLoad = function() {
                     return rs.Load(rstCondition, null, true).then(function(datas){
                         InitSetCurItem();
@@ -221,21 +203,28 @@ app.provider('ControllerHelper', function(){
                 }
 
                 var InitSetCurItem = function() {
-                    if (!$scope[formModelName])
-                        throw new Error('$scope.' + formModelName + ' should be defined before ControllerHelper.Init()');
-                    if ($state.params[idName]) {
-                        if ($state.params[idName] === 'new') {
+                    if ($state.params[mn]) {
+                        let _id = $state.params[mn];
+                        if (_id === 'new') {
+                            //注意：这里增加了一个$scope变量，isNew
+                            $scope.isNew = true;
                             $scope[mn] = null;
-                            $scope[formModelName]._id = 'new';
+                            // reset the formModel
+                            for (var k in $scope[formModelName]) {
+                                delete $scope[formModelName][k];
+                            }
+                            angular.copy(newTpl, $scope[formModelName]);
                         }else {
-                            var doc = Cache.get($state.params[idName]);
+                            var doc = Cache.get(_id);
                             if (!doc) {
                                 return;
                             }
-                            if (!$scope[mn])        //不存在则从cache里取一个
                                 $scope[mn] = doc;
-                            if ($scope[mn] !== doc) //存在但不是当前所需的，则复制过来
-                                angular.copy(doc, $scope[mn]);
+                            // if (!$scope[mn])        //不存在则从cache里取一个
+                            //     $scope[mn] = doc;
+                            // if ($scope[mn] !== doc){ //存在但不是当前所需的，则复制过来
+                            //     angular.copy(doc, $scope[mn]);
+                            // }
 
                             if ($scope[formModelName]) {
                                 angular.copy(doc, $scope[formModelName]);
@@ -245,7 +234,8 @@ app.provider('ControllerHelper', function(){
                         }
                     }
                 }
-                
+
+
                 $scope.LoadList = function(){
                     return rs.Load(rstCondition, null, true).then(function(datas){
                         InitSetCurItem();
@@ -253,12 +243,21 @@ app.provider('ControllerHelper', function(){
                 }
 
 
-                $scope.Delete = function(data) {
+                /**
+                 * nextState:
+                 *      undefined     : $state.go(listState);
+                 *      XXXX:'string' : $state.go(XXXX)
+                 *      true, (isStay): nothing 
+                 */
+                $scope.Delete = function(data, nextState) {
                     return Dialogs.Confirm("是否确认删除此" + modelLabel + "?", "删除确认")
                     .then(function(isYes){
                         if (isYes) {
                             return rs.DeleteById(data._id).then(function(){
-                                $state.go(listState);
+                                if (!nextState) 
+                                    $state.go(listState);
+                                else if (angular.isString(nextState))
+                                    $state.go(nextState);
                             }, Errhandler);
                         }
                     })
@@ -316,7 +315,7 @@ app.provider('ControllerHelper', function(){
 
                 $scope.Edit = function(data) {
                     var params = {};
-                    params[idName] = data._id;
+                    params[mn] = data._id;
                     $state.go(editState, params);
                 }
 
@@ -332,7 +331,7 @@ app.provider('ControllerHelper', function(){
                     Dialogs.Form($scope, {
                         title: $scope.CreateOrUpdateLabel(data) + modelLabel,
                         templateUrl: templateUrl,
-                        controller: controller,
+                        controller: _params.controller,
                         Confirm: function() {
                             return $scope.SimpleSave($scope[formModelName]);
                         }
@@ -345,7 +344,7 @@ app.provider('ControllerHelper', function(){
 
                 $scope.GotoDetail = function(data) {
                     var pa = angular.copy(rstCondition);
-                     pa[idName] = data._id;
+                     pa[mn] = data._id;
                     $state.go(detailState, pa);
                 }
 
@@ -381,7 +380,7 @@ app.factory('DateServ', function() {
     }
 });
 
-app.factory('DictServ', function($rootScope) {
+app.factory('Dict', function($rootScope) {
 
 
     var CreateDict = function(dictName, items) {
@@ -398,14 +397,7 @@ app.factory('DictServ', function($rootScope) {
 
     // Init
     var Init = function() {
-        CreateDict('UserRole', [
-            {k: 'admin', v: '系统管理员'},
-            {k: 'boss', v: '老板'},
-            {k: 'boss-assistant', v: '老板助理'},
-            {k: 'sales', v: '销售代表'},
-            {k: 'sales-assistant', v: '销售助理'},
-            {k: 'sales-manager', v: '销售经理'},
-        ]);
+
         CreateDict('ClientType', [
             {k: 'Supplier', v: '供应商'},
             {k: 'Client', v: '客户'},
@@ -422,6 +414,7 @@ app.factory('DictServ', function($rootScope) {
     Init();
 
     return {
+        CreateDict: CreateDict,
         Lookup: function(dictName, indexName) {
             var dict = $rootScope.dictionaries[dictName];
             if (!dict) return indexName;
@@ -438,10 +431,16 @@ app.factory('DictServ', function($rootScope) {
     }
 })
 
-app.run(function($rootScope, DictServ){
-    $rootScope.DictServ = DictServ;
+app.run(function($rootScope, Dict){
+    $rootScope.Dict = Dict;
 })
 
+
+app.filter('Dict', function(Dict) {
+    return function(indexName, dictName) {
+        return Dict.Lookup(dictName, indexName);
+    }
+})
 
 
 app.factory('FileTypeServ', function($rootScope) {
