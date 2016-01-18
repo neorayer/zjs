@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="http://cdn.staticfile.org/twitter-bootstrap/3.3.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="http://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css">
 
-
-
-
 <script src="http://cdn.staticfile.org/jquery/2.1.1-rc2/jquery.js"></script>
 <script src="http://cdn.staticfile.org/nicescroll/3.5.4/jquery.nicescroll.min.js"></script>
 <script src="http://cdn.staticfile.org/twitter-bootstrap/3.3.1/js/bootstrap.js"></script>
@@ -39,11 +36,11 @@
 <script src="/zjs/route.js"></script>
 <script src="/zjs/qiniu.min.js"></script>
 
-<script src="/zjs/locale/angular-locale_zh-cn.js"></script>
 <script src="/zjs/zform/zform.js"></script>
 <script src="/zjs/zform/zform-tpls.js"></script>
+<script src="/zjs/ztree/ztree.js"></script>
 
-<script src="/zjs/demo/netbank-form.js"></script>
+<script src="taobao-form.js"></script>
 
 
 <style type="text/css">
@@ -58,14 +55,25 @@ html body {
 .has-error .help-block {
   display: block;
 }
-
-
-#transferForm fieldset {
-  background-color: #f2f2f2;
-  padding:20px;
-  margin-bottom: 30px;
-}
 </style>
+
+
+
+
+<!--
+<link rel="stylesheet" type="text/css" href="https://bootswatch.com/cerulean/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+<link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-material-design/dist/css/ripples.css">
+<script src="/bower_components/bootstrap-material-design/dist/js/material.js"></script>
+<script src="/bower_components/bootstrap-material-design/dist/js/ripples.js"></script>
+<script type="text/javascript">
+$.material.init();
+</script>
+-->
+
+
+
+
 
 
 
@@ -74,45 +82,85 @@ html body {
 <body ng-app="zjsdemo">
 
 <div class="container-fluid"  
-     ng-controller="TransferController">
+     ng-controller="ProductController">
 
   <div class="row">
-    <div class="col-sm-4">
-      <pre style="position:fixed;top:0" ng-bind="formTransfer|json">
-      </pre>
-    </div>
-    <div class="col-sm-8">
-      <h2>Transfers & BPAY</h2>
-      <form id="transferForm" name="testForm" novalidate class="form-horizontal" >
+    <div class="col-sm-offset-2 col-sm-8">
+      <form name="testForm" novalidate class="form-horizontal" >
         <fieldset>
-          <div zform-row="row"
-               ng-repeat="row in rows1"
-               ng-model="formTransfer"
-               ></div>
-        </fieldset>
+          <legend>1. 基本信息</legend>
+       
 
-        <fieldset ng-if="formTransfer.isToNew">
-          <h3>Add a new payee</h3>
-          <div zform-row="row"
-               ng-repeat="row in rows2"
-               ng-model="formTransfer"
-               ></div>
+          <div ng-repeat="row in rows1" 
+               zform-row="row" 
+               ng-model="formProduct" 
+               ng-if="!row.ngIf || row.ngIf()"></div>
+
+          
+
+          <div class="form-group">
+            <div class="col-sm-3 control-label">
+              <label>宝贝图片</label>
+            </div>
+            <div class="col-sm-9">
+              <uib-tabset>
+                <uib-tab heading="本地上传">
+                  <div zform-pics="cols.pictures" ng-model="formProduct"></div>
+                </uib-tab>
+                <uib-tab select="alertMe()">
+                  <uib-tab-heading>
+                    <i class="fa fa-home"></i>图片空间
+                  </uib-tab-heading>
+                  I've got an HTML heading, and a select callback. Pretty cool!
+                </uib-tab>
+              </uib-tabset>              
+            </div>
+          </div>
+
+          <div zform-row="['宝贝描述', cols.desc]" ng-model="formProduct"></div>
+        </fieldset> 
+
+        <fieldset>
+          <legend>2. 物流信息</legend>
+          <div ng-repeat="row in rows2" 
+               zform-row="row" 
+               ng-model="formProduct" 
+               ng-if="!row.ngIf || row.ngIf()"></div>
         </fieldset>
 
         <fieldset>
-          <h3>Add a new payee</h3>
-          <div zform-row="row"
-               ng-repeat="row in rows3"
-               ng-model="formTransfer"
-               ></div>
+          <legend>3. 售后保障信息</legend>
+          <div ng-repeat="row in rows3" 
+               zform-row="row" 
+               ng-model="formProduct" 
+               ng-if="!row.ngIf || row.ngIf()"></div>
         </fieldset>
 
+        <fieldset>
+          <legend>4. 其他信息</legend>
+          <div ng-repeat="row in rows4" 
+               zform-row="row" 
+               ng-model="formProduct" 
+               ng-if="!row.ngIf || row.ngIf()"></div>
+        </fieldset>
+
+        <fieldset class="navbar navbar-default navbar-fixed-bottom">
+          <div zform-row="['', '', cols.submit, '']"></div>
+        </fieldset>
       </form>
     </div>
   </div>
+<pre>
+{{formProduct|json}}
+</pre>
 </div>
 
-
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 </body>
 </html>

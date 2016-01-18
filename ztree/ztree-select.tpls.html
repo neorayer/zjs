@@ -1,0 +1,27 @@
+<div >
+  <a ng-show="!isSearch"
+     class="btn btn-block btn-default" 
+     style="text-align:left"
+     ng-click="clickDropdown()">
+    <span>{{getModelLabel()}}&nbsp;</span>
+    <i class="fa fa-caret-down pull-right"></i>
+  </a>
+  <input ng-show="isSearch" 
+         type="text" 
+         class="form-control" 
+         ng-model="$search"
+         ng-change="onSearchChange()"
+         placeholder="{{def.placeholder}}"
+         >
+  <div ng-show="isDropdown" 
+       class="panel panel-default" 
+       style="box-shadow:0 6px 12px;position:fixed;z-index:99999">
+    <div  style="height:auto;max-height:300px;overflow-y:scroll">
+      <ztree-list-group def="def" items="def.options" search="$search" selected="defaultSelected"></ztree-list-group>
+    </div>
+    <div class="panel-footer">
+      <a class="btn btn-primary" ng-click="confirm()">确定</a>
+      <a class="btn btn-default" ng-click="cancel()">取消</a>
+      </div>
+  </div>
+</div>

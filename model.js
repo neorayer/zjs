@@ -149,19 +149,21 @@ var InitModelFactory = function(app) {
                 return $q.when();
             }
 
+            if (!rsc[conKey])
+                $rootScope[_an] = rsc[conKey] = [];
+
             //接下来向服务器发起请求
 
             //先清空。因为Load是异步调用，用户可能先看到上次残留的数据。
-            $rootScope[_an] = [];
-            //    $rootScope[_an] = 0; //这种清除的办法可以保留原数组的引用。
+            //$rootScope[_an] = [];
+            if ($rootScope[_an])
+                $rootScope[_an].length = 0; //这种清除的办法可以保留原数组的引用。
 
             return _this.Search({
                 cond: cond,
                 filter: filter,
             }).then(function(items){
-                $rootScope.rsCache[conKey] = angular.copy(items);
-                //将缺省cache list 指向当前搜索条件的cache list
-                $rootScope[_an] = rsc[conKey];
+                items.forEach(function(item) {rsc[conKey].push(item);})
             });
         };
 

@@ -431,6 +431,36 @@ app.controller('ProductController', function(
                 text: '<i class="fa fa-exclamation-circle "></i>勾选后商品将无“购物车”功能，且单次只能购买一件，点此<a href>查看详情</a>',
             }
         ],
+
+        [
+            'ztree-select测试',
+            {
+                colClass: 'col-sm-9',
+                el: 'ztree-select',
+                name: 'category',
+
+                placeholder: '搜索关键词',
+                rootName: '所有分类',
+                options: [
+                    { _id: '1',            name: 'food'},
+                    { _id: '11', pid: '1', name: 'sea food'},
+                    { _id: '12', pid: '1', name: 'meat'},
+                    { _id: '121', pid: '12', name: 'pork'},
+                    { _id: '122', pid: '12', name: 'lamb'},
+                    { _id: '1221', pid: '122', name: 'goat lamb'},
+
+                    { _id: '2',            name: 'tools'},
+                    { _id: '21', pid: '2', name: 'kitchen tools'},
+                    { _id: '22', pid: '2', name: 'garage tools'},
+                    { _id: '23', pid: '2', name: 'garden tools'},
+
+                    { _id: '1222', pid: '122', name: 'sheep lamb'},
+                    { _id: '123', pid: '12', name: 'beef'},
+                    { _id: '124', pid: '12', name: 'chicken'},
+                    { _id: '13', pid: '1', name: 'vegitable'},
+                ],
+            }
+        ],
         
     ]
 

@@ -2,3 +2,31 @@
    padding: 0 !important;
    margin: 0 !important;
 }
+
+.left-toggle-navbar .navbar-toggle .fa {
+	color: white;
+}
+
+@media (max-width:767px) {
+	.left-toggle-navbar .navbar-right {
+	    float: right;
+	    padding-right: 15px;
+	}
+	.left-toggle-navbar .nav.navbar-nav.navbar-right li {
+	    float: right;
+	}
+  	.left-toggle-navbar .nav.navbar-nav.navbar-right li > a {
+	    padding:8px 5px;
+	}
+	.left-toggle-navbar .navbar-toggle {
+	    float: left
+	}
+	.left-toggle-navbar .navbar-header {
+	    float: left;
+	    width: auto!important;
+	}
+	.left-toggle-navbar .navbar-collapse {
+	    clear: both;
+	    float: none;
+	}
+}
