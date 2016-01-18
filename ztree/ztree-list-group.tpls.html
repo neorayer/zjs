@@ -1,23 +1,30 @@
-<div class="list-group">
-  <a class="list-group-item"
-     ng-class="{active:isSelected(rootItem)}"
-     href ng-click="onClick(rootItem)"
-    >
-    <span ng-bind="def.rootName"></span>
-  </a>
-
-  <a ng-repeat="item in items|filter:search" 
-     id="item-{{item._id}}"
-     ng-if="isVisible(item)"
-     class="list-group-item"
-     ng-class="{active:isSelected(item)}"
-     href 
-     ng-click="onClick(item)"
+<table class="table">
+  <tr>
+    <td>
+      <a 
+         ng-class="{active:isSelected(rootItem)}"
+         href ng-click="onClick(rootItem)"
+        >
+        <span ng-bind="def.rootName"></span>
+      </a>      
+    </td>
+  </tr>
+  <tr ng-repeat="item in items|filter:search" 
+         ng-if="isVisible(item)"
+         id="item-{{item._id}}"
+         ng-class="{active:isSelected(item)}"
       >
+    <td style="border:none">
+      <a href ng-click="toggle(item)"
+        <i class="{{item.nodeIcon}}"
+           ng-style="{'margin-left':item.depth * 20 + 'px'}"
+           ></i>
+      </a>
 
-    <i class="{{item.nodeIcon}}"
-       ng-style="{'margin-left':item.depth * 20 + 'px'}"
-       ></i>
-      <span ng-bind="getItemLabel(item)"></span>
-  </a>
-</div>
+      <a ng-click="onClick(item)" href >
+          <span ng-bind="getItemLabel(item)"></span>
+      </a>
+    </td>
+  </tr>
+</table>
+
