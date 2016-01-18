@@ -1,0 +1,23 @@
+<div class="list-group">
+  <a class="list-group-item"
+     ng-class="{active:isSelected(rootItem)}"
+     href ng-click="onClick(rootItem)"
+    >
+    <span ng-bind="def.rootName"></span>
+  </a>
+
+  <a ng-repeat="item in items|filter:search" 
+     id="item-{{item._id}}"
+     ng-if="isVisible(item)"
+     class="list-group-item"
+     ng-class="{active:isSelected(item)}"
+     href 
+     ng-click="onClick(item)"
+      >
+
+    <i class="{{item.nodeIcon}}"
+       ng-style="{'margin-left':item.depth * 20 + 'px'}"
+       ></i>
+      <span ng-bind="getItemLabel(item)"></span>
+  </a>
+</div>

@@ -79,6 +79,12 @@ app.provider('ControllerHelper', function(){
 
                 $scope.$state = $state;
 
+                // for ....edit?init=XXXXXX
+                var initData;
+                var initParam = $state.params['init'];
+                if (initParam)
+                    initData = angular.fromJson(initParam);
+
                 newTpl._id = 'new';
                 // 初始化创建 formXXXX对象
                 $scope[formModelName] = $scope[formModelName] || angular.copy(newTpl);
@@ -115,6 +121,8 @@ app.provider('ControllerHelper', function(){
                                 delete $scope[formModelName][k];
                             }
                             angular.copy(newTpl, $scope[formModelName]);
+                            if (initData)
+                                angular.copy(initData, $scope[formModelName]);
                         }else {
                             var doc = Cache.get(_id);
                             if (!doc) {
@@ -155,11 +163,11 @@ app.provider('ControllerHelper', function(){
                     .then(function(isYes){
                         if (isYes) {
                             return rs.DeleteById(data._id).then(function(){
-                                if (!nextState) 
-                                    $state.go(listState);
-                                else if (angular.isString(nextState))
+                                if (!nextState)  {
+                                } else if (angular.isString(nextState)) {
                                     $state.go(nextState);
-                            }, Errhandler);
+                                }
+                            }, function(err) {console.error(err)});
                         }
                     })
                 }

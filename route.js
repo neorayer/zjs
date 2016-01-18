@@ -49,6 +49,7 @@ var StateCreater = function(moduleDir, stateProvider) {
             {
                 name: stateRootName+ '.create',
                 url: '/create',
+                __ctl:  ctlName,
             },
             {
                 name: stateRootName+ '.list',
@@ -57,6 +58,7 @@ var StateCreater = function(moduleDir, stateProvider) {
             {
                 name: stateRootName+ '.one',
                 url: '/one/:' +  modelName,// +'Id', //TODO 暂时废弃 /:_random', //这个random用来带入随机数,用以强制reload
+                __ctl:  ctlName,
             },
             {
                 name: stateRootName+ '.one.detail',
@@ -64,7 +66,7 @@ var StateCreater = function(moduleDir, stateProvider) {
             },
             {
                 name: stateRootName+ '.one.edit',
-                url: '/edit',
+                url: '/edit?init',
                 __ctl:  ctlName,
             },
         ];

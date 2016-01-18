@@ -6,7 +6,7 @@
 'use strict'
 
 
-var app = angular.module('zform', ['ui.bootstrap', 'ui.select', 'ngSanitize', 'pascalprecht.translate']);
+var app = angular.module('zform', ['ui.bootstrap', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ztree']);
 
 app.config(function($translateProvider) {
     $translateProvider.translations('en', {
@@ -262,6 +262,9 @@ app.directive('zformCol', function($compile){
                 break;
             case 'pics':
                 html = '<div zform-pics="colDef" ng-model="ngModel"></div>';
+                break;
+            case 'ztree-select':
+                html = '<ztree-select def="colDef" ng-model="ngModel[colDef.name]"></ztree-select>';
                 break;
             default:
                 html = '<zform-edit ng-model="ngModel" def="colDef"></zform-edit>';
