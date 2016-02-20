@@ -1,9 +1,43 @@
+/**
+ * StateCreater() specifies a set of convention to define routes in Angular 1.x.
+ * It depends on 'angular-ui/ui.router'.
+ */
+
 // example: moduleDir = '/public/kanga/devices/ph/m/'
+/**
+ * StateCreater class
+ *
+ *
+ * examples: 
+ *  app.config(function($stateProvider){
+ *      var sc = new StateCreater('/ui-user/pc/m/', $stateProvider);
+ *
+ *      sc.createStates('home', 'home');
+ *      sc.createStates('dashboard', 'dashboard');
+ *      sc.createStates('product', 'product', null, null, globalResolve);
+ *      sc.createStates('product', 'product.category');
+ *      sc.createStates('product', 'product.one.editwb');
+ *  }
+ */
 var StateCreater = function(moduleDir, stateProvider) {
     this.moduleDir = moduleDir;
 
-    // createStates($statePrivider, 'client', 'client')
-    // createStates($statePrivider, 'client', 'client.one.address')
+    // examples:
+    //     sc.createStates('home', 'home');
+    //     sc.createStates('dashboard', 'dashboard');
+    //     sc.createStates('product', 'product', null, null, globalResolve);
+    //     sc.createStates('product', 'product.category');
+    //     sc.createStates('product', 'product.one.editwb');
+    //     sc.createStates('product', 'product.one.price');
+    //     sc.createStates('product', 'product.one.picture');
+    //     sc.createStates('product', 'product.one.document');
+    //     sc.createStates('product', 'product.one.supplier');
+    //     sc.createStates('supplier', 'supplier', null, null, globalResolve);
+    //     sc.createStates('supplier', 'supplier.one.supProduct');
+    //     sc.createStates('user', 'user');
+    //     sc.createStates('client', 'client');
+    //     sc.createStates('client', 'client.one.oppt');
+    //     sc.createStates('client', 'client.one.contact');
     this.createStates = function(moduleName, stateRootName, controllerName, viewName, resolve) {
         // 缺省参数填补
         if (!controllerName)

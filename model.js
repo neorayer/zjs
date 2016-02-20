@@ -1,6 +1,15 @@
+/**
+ * model.js is a tool kit to simplify Model implements in Angular 1.x Framework.
+ * The coolest features includes:
+ * - **CACHE**: Automatic local cache for single model object or collection.
+ * - **RESTful**: Compatible any RESTful back-end.
+ * - **FILTER**: Both remote and local data filter are supported.
+ * - **POPULATE**: local property populating.
+ * - **SIMPLE**: Define a model object by ONLY ONE statement like: 
+ *         DefineCommonRS(app, '/u', 'product',    'products');
+ */
+ 
 var InitModelFactory = function(app) {
-
-
     app.factory('Cache', ['$rootScope', function($rootScope) {
         if (!$rootScope.___rsCacheItems)
             $rootScope.___rsCacheItems = [];

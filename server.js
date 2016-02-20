@@ -1,4 +1,6 @@
-
+/**
+ * A common express server implement.
+ */
 var express     = require('express')
     , Q         = require('q')
     , mongoose  = require('mongoose')
@@ -8,17 +10,17 @@ var express     = require('express')
     , fs        = require('fs')
     , path      = require('path')
     , busboy    = require('busboy')
-    , session   = require('cookie-session') //开发时，使用cookie-session，可以避免reload node时所有session都丢失了
+    // in dev-env, using cookie-session instead of express-session
+    // to avoid session expiry after reloading.
+    , session   = require('cookie-session') 
     //, session     = require('express-session') 
     , cookie    = require('cookie-session')
     , cookieParser = require('cookie-parser')
-
     , ak        = require('./army-knife.js')
-    , config        = require('../ws/app/config')
+    , config        = require('../ws/config')
     ;
 
 exports = module.exports.Start = function() {
-
     // ------ Log4j
     log4js.configure('log4js.json', {});
     var logger = log4js.getLogger();
@@ -33,10 +35,9 @@ exports = module.exports.Start = function() {
         if(err) throw err;
     });
 
-
     // ------ auto require models 
-    fs.readdirSync(path.join(__dirname , '../ws/app/models')).forEach(function (file) {
-      if (~file.indexOf('.js')) require(path.join(__dirname, '../ws/app/models/' , file));
+    fs.readdirSync(path.join(__dirname , '../ws/models')).forEach(function (file) {
+      if (~file.indexOf('.js')) require(path.join(__dirname, '../ws/models/' , file));
     });
 
     // ------ app
@@ -78,8 +79,7 @@ exports = module.exports.Start = function() {
 
 
     app.use('/u', function(req, res, next) {            // user session checking
-        // TODO 
-        //这里检查 content-type来判断返回类型还没有实现
+        //TODO : Adjust the type of return by the type of content-type
         if (!req.session.user) 
             res.status(400).jsonp({msg: 'session error'});
         else 
@@ -87,8 +87,7 @@ exports = module.exports.Start = function() {
     });
 
     app.use('/a', function(req, res, next) {            // admin session checking
-        // TODO 
-        //这里检查 content-type来判断返回类型还没有实现
+        //TODO : adjest the type of return by the type of content-type
         if (!req.session.admin) 
             res.status(400).jsonp({msg: 'session error'});
         else 
@@ -109,8 +108,9 @@ exports = module.exports.Start = function() {
             }).then(function(json){
                 res.jsonp(json);
             }, function(err) {
-                // 如果有 err.field, 说明是 {field: xxx, error: new Error()}结构。
-                // 否则是简单new Error()结构
+                // the format of err is:
+                //  - {field: xxx, error: new Error()} if err.field exists
+                //  - new Error() if not
                 console.error(err.field? err.error.stack: err.stack);
 
                 if (err.field) {
@@ -136,17 +136,19 @@ exports = module.exports.Start = function() {
         };
     }
 
-
-    // ---- a function to create a set of RESTful route for a model
+    // Create a set of RESTful route for a model, 
     function commonRouter(prefix, name, ctlPath) {
         prefix  = prefix || '';
         var ctl = require(ctlPath);
         console.log('Make common router for: ' + ctlPath );
 
-        // [get]    /name  -->  ctl.Search()
-        // [post]   /name  -->  ctl.Save()
-        // [get]    /name/:id --> ctl.Read()
-        // [delete] /name/:id --> ctl.Delete()
+        // [get]    /name  -->  ctl.Search()    - json
+        // [post]   /name  -->  ctl.Save()      - json
+        // [get]    /name/:id --> ctl.Read()    - json
+        // [delete] /name/:id --> ctl.Delete()  - json
+        // [get]    /name  -->  ctl.GetRender()       - ejs template
+        // [get]    /name/arg1 -->  ctl.GetRender_1() - ejs template
+        // [post]   /name  -->  ctl.PostRender()      - ejs template
         if (ctl.Search) {
             var route = prefix + '/' + name; 
             app.get   (route, jsonpWrap(ctl.Search));
@@ -184,7 +186,6 @@ exports = module.exports.Start = function() {
         }
     }
 
-
     //遍历 dir目录，定义路由
     var DefineRouters = function(prefix, dir) {
         var files = fs.readdirSync(dir);
@@ -207,7 +208,7 @@ exports = module.exports.Start = function() {
         });
     }
 
-    DefineRouters('', path.join(__dirname, '../ws/app/controllers'));
+    DefineRouters('', path.join(__dirname, '../ws/controllers'));
 
     // ------ start server !!
 

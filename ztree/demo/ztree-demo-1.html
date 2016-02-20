@@ -30,16 +30,17 @@
 <script src="http://cdn.staticfile.org/textAngular/1.4.6/textAngular-sanitize.min.js"></script>
 <script src="http://cdn.staticfile.org/textAngular/1.4.6/textAngular.min.js"></script>
 
+<script src="http://cdn.staticfile.org/angular-ui-sortable/0.13.4/sortable.min.js"></script>
+<script src="http://cdn.staticfile.org/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
 <script src="/zjs/countries.js"></script>
 <script src="/zjs/army-knife.js"></script>
 <script src="/zjs/model.js"></script>
 <script src="/zjs/route.js"></script>
 <script src="/zjs/qiniu.min.js"></script>
 
-<script src="/zjs/zform/zform.js"></script>
-<script src="/zjs/zform/zform-tpls.js"></script>
-
-<script src="/zjs/demo/qiniu-uploader.js"></script>
+<script src="/zjs/ztree/ztree.js"></script>
+<script src="ztree-demo-1.js"></script>
 
 
 <style type="text/css">
@@ -59,34 +60,88 @@ html body {
 
 
 
-<!--
-<link rel="stylesheet" type="text/css" href="https://bootswatch.com/cerulean/bootstrap.css">
-<link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css">
-<link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-material-design/dist/css/ripples.css">
-<script src="/bower_components/bootstrap-material-design/dist/js/material.js"></script>
-<script src="/bower_components/bootstrap-material-design/dist/js/ripples.js"></script>
-<script type="text/javascript">
-$.material.init();
-</script>
--->
-
-
-
-
 
 
 
 </head>
 
-<body ng-app="zjsdemo">
+<body ng-app="demo">
 
 <div class="container-fluid"  
-     ng-controller="ProductController">
+     ng-controller="DemoTreeController">
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="btn-group">
+        <a class="btn btn-default" 
+           ng-click="expandToDepth(depth)"
+           ng-repeat="depth in [1,2,3,4,5,6]">
+          {{depth}}
+        </a>
+      </div>
 
-<a id="uploaderBtn" class="btn btn-primary" qiniu-uploader="btnDef">上传</a>
 
-{{formProduct|json}}
+      <ztree-select def="selectDef" ng-model="data.category"></ztree-select>
+
+      <ztree-list-group def="treeDef" items="categories"></ztree-list-group>
+
+<pre>
+{{data.category|json}}
 </pre>
+
+
+    </div>
+    <div class="col-sm-8">
+      <h1>
+        <input type="text" ng-model="curItem.name">
+
+      </h1>
+      <button class="btn btn-danger"
+              ng-click="DeleteNode(curItem)">
+        删除
+      </button>
+      <input type="text" ng-model="newItem.name">
+      <button class="btn btn-default"
+              ng-click="AddNode(newItem)">
+        添加
+      </button>
+
+<table class="table table-hover" >
+  <tbody ui-sortable ng-model="curItem.children">
+  <tr ng-repeat="child in curItem.children"
+      >
+    <td>
+      <a href ng-click="OpenNode(child)">
+        {{child.name}}
+      </a>
+      </td>
+    <td>
+      <a ng-click="DeleteNode(child)"><i class="fa fa-trash"></i></a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+<pre>
+{{curItem.children|json}}
+</pre>
+
+    </div>
+  </div>
+
+
+<!--
+    <tbody ztree="treeDef"
+           ng-model="categories"
+           tree-items="items"
+           >
+      <tr ng-repeat="item in items">
+        <td ztree-node="item"></td>
+        <td>item.memo</td>
+        <td>item.count</td>
+      </tr>
+    </tbody>
+-->
+  </table>
+
 </div>
 
 
