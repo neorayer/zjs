@@ -3,7 +3,6 @@
  * It depends on 'angular-ui/ui.router'.
  */
 
-// example: moduleDir = '/public/kanga/devices/ph/m/'
 /**
  * StateCreater class
  *
@@ -18,6 +17,8 @@
  *      sc.createStates('product', 'product.category');
  *      sc.createStates('product', 'product.one.editwb');
  *  }
+ * 
+ * Each createState() will create 7 states of a module, they can cover most all the states of business logic.
  */
 var StateCreater = function(moduleDir, stateProvider) {
     this.moduleDir = moduleDir;
