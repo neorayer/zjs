@@ -1,8 +1,8 @@
 'use strict'
 
 var app = angular.module('zjsdemo', [
-        'ngResource', 'ui.router', 'ui.bootstrap',
-        'ui.select', 'ngSanitize', 'ngCookies', 
+        'ui.bootstrap', 'ui.router',
+        'ui.select', 'ngSanitize',  
         'pascalprecht.translate', 'textAngular',
         'ngLocale',
         'zform']);
