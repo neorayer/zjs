@@ -1,7 +1,14 @@
 'use strict'
 
-
-//////////////////////////////////////////
+/**
+ * service.js define a set of Angular services. 
+ * For simpleness, the services are not be packaged as a Angular module.
+ * As the default convention, just place '<script src="service.js">' after
+ * var app = angular.module('xxxxx', [.....]).
+ *
+ * TODO: change the services to different modules.
+ * 
+ */
 
 app.provider('Dialogs', function() {
     this.$get = function($uibModal) {
@@ -29,6 +36,9 @@ app.provider('Dialogs', function() {
                 return win.result;
             },
 
+            /**
+             * @Deprecated
+             */
             Form: function(scope, params) {
                 var win = $uibModal.open({
                     templateUrl: '/zjs/tpls/dialog-form.html',
@@ -61,6 +71,34 @@ app.provider('Dialogs', function() {
 })
 
 
+/**
+ * ControllerHelper is the most important tool in zjs lib.
+ * It injects the most useful methods and variables into $scope. likes:
+ * - $scope.isNew
+ * - $scope.formProduct
+ * - $scope.product
+ * - $scope.LoadList()
+ * - $scope.Delete()
+ * - $scope.DeleteChecked()
+ * - $scope.Save()
+ * - $scope.Edit()
+ * - $scope.Cancel()
+ * and so on.
+ * 
+ *
+ *   example:
+ *   ControllerHelper.Init({
+ *       scope:     $scope,
+ *       controller: 'ProductCategoryController',
+ *       modelLabel: '产品分类',
+ *       modelName:  'category',
+ *       rs:         CategoryRS,
+ *       restricts:  null,
+ *       stateHead:  null,
+ *       newTpl:     {},
+ *   }).then(function(){
+ *   });
+ */
 app.provider('ControllerHelper', function(){
     this.$get = function($rootScope, $state, $timeout, $q, Cache, Dialogs) {
         return {
@@ -226,25 +264,6 @@ app.provider('ControllerHelper', function(){
                     var params = {};
                     params[mn] = data._id;
                     $state.go(editState, params);
-                }
-
-                $scope.DialogEdit = function(data, templateUrl) {
-                    if (!templateUrl)  {
-                        var state = $state.get(editState);
-                        if (!state)
-                            throw new Error('Can not get state: '  + editState);
-                        templateUrl = $state.get(editState).views[""].templateUrl;
-                    }
-
-                    $scope[formModelName] = angular.copy(data);
-                    Dialogs.Form($scope, {
-                        title: $scope.CreateOrUpdateLabel(data) + modelLabel,
-                        templateUrl: templateUrl,
-                        controller: _params.controller,
-                        Confirm: function() {
-                            return $scope.SimpleSave($scope[formModelName]);
-                        }
-                    });
                 }
 
                 $scope.Cancel = function() {

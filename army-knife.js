@@ -8,15 +8,19 @@ var Clone = exports.Clone = function(src) {
     ValueCopy(src, dest);
     return dest;
 }
-//复制。
-//1 只赋值属性，不复制方法。
-//2 不会循环。
-//3 不复制DOM
+
+
+/**
+ * ValueCopy
+ * 1. Only copy properties, not copy methods(functions).
+ * 2. Loop traversing has been avoided.
+ * 3. the DOM/HTMLElement properties will NOT be copyed.
+ */
 var ValueCopy = exports.ValueCopy = function (__src, __dest) {
     if (!__src)
         return;
 
-    //用以记录曾经遍历过的对象，避免无限循环遍历
+    // objects is used to store the Object-type properties, to avoid traversing loop 
     var objects = [__src];
     function hasBeenCopied(object) {
         for(var i=0; i<objects.length; i++) {
@@ -29,7 +33,7 @@ var ValueCopy = exports.ValueCopy = function (__src, __dest) {
     function isArray(o) {
         if (o instanceof Array)
             return true;
-        //Array.isArray可能有些浏览器不支持
+        //Array.isArray is not supported in older browser.
         if (Array.isArray && Array.isArray(o))
             return true;
         return false;
@@ -37,29 +41,27 @@ var ValueCopy = exports.ValueCopy = function (__src, __dest) {
 
     function copy(src, dest) {
         for(var key in src) {
-            // NOTES:修复浏览器的一个BUG
+            // NOTES: to fixed a bug of some browsers
             if (key === 'selectionDirection' 
                 || key === 'selectionEnd' 
                 || key === 'selectionStart')
                 continue;
             var val = src[key];
-            //不复制DOM
+            //NO copy DOM
             if (val instanceof HTMLElement)
                 continue;
-            //不复制function
+            //NO copy function
             if (typeof(val) === 'function') 
                 continue;
             if (typeof(val) === 'object') {
-                //如果是曾经遍历copy过的对象，则只复制一个引用
+                // only the reference of object will be copyed, if it has been copyed
                 if (hasBeenCopied(val)) {
                     dest[key] = val;
                     continue;
                 }
-
-                //记录遍历过的对象
                 objects.push(val);
 
-                //需要区分object和array。
+                // Deal with object/array in two ways
                 dest[key] = isArray(val) ? [] : {};
 
                 copy(val, dest[key]);
@@ -69,8 +71,10 @@ var ValueCopy = exports.ValueCopy = function (__src, __dest) {
         }
     }
 
+    // Recursive!
     copy(__src, __dest);
 }
+
 
 var SNAKE_CASE_REGEXP = /[A-Z]/g;
 var SnakeCase = exports.SnakeCase = function(name, separator) {
@@ -80,37 +84,42 @@ var SnakeCase = exports.SnakeCase = function(name, separator) {
   });
 }
 
-// 首字母大写
+
 var CapitalFirst = exports.CapitalFirst = function (word) {
     if (word.length === 0)
         return word;
     return word.substring(0,1).toUpperCase( ) + word.substring(1);;
 }
 
-var NiceTrim = exports.NiceTrim = function (obj, key) {
 
+var NiceTrim = exports.NiceTrim = function (obj, key) {
     if (!obj)
         return;
     if (!obj[key])
         return;
-
     obj[key] = obj[key].trim().replace(/ +/g, ' ');
 }
 
 
+/**
+ * The props of data matching below conditions will be removed.
+ * 1. Start with '$'.
+ * 2. Functions.
+ * 3. Any depth of the prop matching 1 and 2.0
+ */
 var PurifyData = exports.PurifyData = function(data) {
     for(var k in data){
-        //去除所有$开头的属性
+        // Remove: start with $
         if (k.indexOf('$') === 0) {
             delete data[k];
             continue;
         }
         switch(typeof data[k]) {
-            // 删除function
+            // Remove: function
             case 'function':
                 delete data[k];
                 break;
-            //递归到属性里去遍历
+            // Recursive
             case 'object':
                 PurifyData(data[k]);
                 break;
@@ -118,9 +127,14 @@ var PurifyData = exports.PurifyData = function(data) {
     }
 }
 
-// Arguments :
-//  verb : 'GET'|'POST'
-//  target : an optional opening target (a name, or "_blank"), defaults to "_self"
+
+/** 
+ * Similar with  window.open() but updated by supporting 'POST'
+ * @param {string} verb  'GET'|'POST'
+ * @param {string} url 
+ * @param {string} data the parameters of url
+ * @param {string} target an optional opening target (a name, or "_blank"), defaults to "_self"
+ */
 var OpenWindow = exports.OpenWindow = function(verb, url, data, target) {
     var form = document.createElement("form");
     form.action = url;
@@ -140,14 +154,16 @@ var OpenWindow = exports.OpenWindow = function(verb, url, data, target) {
 };
 
 
-
-//将obj对象转换成url query
+/**
+ * Convert object to url query string
+ */
 var ObjectToQuery = exports.ObjectToQuery = function(obj, prefix) {
     if (!obj) return "";
     var str = [];
     for(var p in obj) {
         if (obj.hasOwnProperty(p)) {
-            var k = prefix ? prefix + "[" + p + "]" : p, v = obj[p];
+            var k = prefix ? prefix + "[" + p + "]" : p;
+            var v = obj[p];
             str.push(typeof v == "object" ?
                    serialize(v, k) :
             encodeURIComponent(k) + "=" + encodeURIComponent(v));
@@ -156,7 +172,9 @@ var ObjectToQuery = exports.ObjectToQuery = function(obj, prefix) {
     return str.join("&");
 }
 
-// 抛出一个错误对象，格式为 {field: xxxx, msg: xxx, error: ....}
+/**
+ * Throw out a object with format {field: xxxx, msg: xxx, error: ....}
+ */
 var ThrowError = exports.ThrowError = function(field, msg) {
     throw {field: field, error: new Error(msg)};
 }
@@ -164,6 +182,14 @@ var ThrowError = exports.ThrowError = function(field, msg) {
 
 
 /////////////////////////////////////////////////////////
+// Array prototype enghance
+/////////////////////////////////////////////////////////
+
+/**
+ * @return true, if
+ * 1. every prop of cond exists in obj, and
+ * 2, both value are same.
+ */
 function isCondMatch(obj, cond) {
     if (!cond)
         return true;
@@ -244,10 +270,9 @@ Array.prototype.ReplaceOneByCondition = function(cond, newItem) {
     }
 }
 
-
-
-// Save === 有则更改，无则新增
-//    有无的判断条件为cond
+/**
+ *  Update one of the item in array if matching cond, or push into array. 
+ */
 Array.prototype.SaveOneByCondition = function(cond, item) {
     for (var i=0; i<this.length; i++) {
         if (isCondMatch(this[i], cond)) {
@@ -261,13 +286,15 @@ Array.prototype.SaveOneByCondition = function(cond, item) {
     this.push(item);
 }
 
-// Save === 有则更改，无则新增
-//   key为要判断的属性名
+
+/**
+ * Update one of the item in array if matching condition, or push into array. 
+ * The condition is cond[key] = item[key]
+ */
 Array.prototype.SaveOneByKey = function(key, item) {
     if (typeof(key) !== 'string')
         throw 'Array.SaveOneByKey(key, item). key must be string';
     if (!item[key]) {
-console.log(key, item); // ****************
         throw 'Error: Array.SaveOneByKey: item.' + key + ' should not be null';
     }
 
@@ -277,7 +304,9 @@ console.log(key, item); // ****************
     this.SaveOneByCondition(cond, item);
 }
 
-// Save === 有则更改，无则新增
+/**
+ * Similar with SaveOneByKey(), but every props must equal.
+ */
 Array.prototype.SaveOne = function(item) {
     for (var i=0; i<this.length; i++) {
         if (this[i] === item) {
@@ -288,7 +317,6 @@ Array.prototype.SaveOne = function(item) {
     // no found, push it
     this.push(item);
 }
-
 
 Array.prototype.SaveArray = function(items) {
     for (var i=0; i<items.length; i++)
@@ -305,28 +333,15 @@ Array.prototype.PushArray = function(items) {
         this.push(items[i]);
 }
 
-// ////////////////////////////////////////////////////////////
-// var StandControllerInit = function($scope, $state, mn /* Model Name */, rs) {
-//     var listName = mn + 's';
-//     var formModelName = 'form' + CapitalFirst(mn);
-//     var idName = mn + 'Id';
-
-//     if (!$scope[listName]) {
-//         $scope[listName] = [];
-//         rs.Load().then(function(datas){
-//             $scope[listName]= datas;
-//         });
-//     }
-
-//     $scope[formModelName] = {};
-
-//     if ($state.params[idName] && $state.params[idName] !== 'new') {
-//         $scope[mn] = Cache.get($state.params[idName]);
-//         $scope[formModelName] = angular.copy($scope[mn]);
-//     }
-// }
 
 
+/**
+ * @return a number array with years from beginY to endY. 
+ * example: YearsArray(2000, 2005) =>
+ *  [2000, 2001, 2002, 2003, 2004, 2005]
+ *
+ * TODO: the code should be moved to other module late
+ */
 var YearsArray = exports.YearsArray = function(beginY, endY) {
     var years = new Array();
     if (endY >= beginY) {
@@ -339,5 +354,4 @@ var YearsArray = exports.YearsArray = function(beginY, endY) {
         }
     }
     return years;
-
 }
