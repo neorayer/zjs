@@ -1,77 +1,6 @@
 'use strict'
 
 /**
- * service.js define a set of Angular services. 
- * For simpleness, the services are not be packaged as a Angular module.
- * As the default convention, just place '<script src="service.js">' after
- * var app = angular.module('xxxxx', [.....]).
- *
- * TODO: change the services to different modules.
- * 
- */
-
-app.provider('Dialogs', function() {
-    this.$get = function($uibModal) {
-        return {
-            Confirm: function(content, title) {
-                var win = $uibModal.open({
-                    templateUrl: '/zjs/tpls/dialog-confirm.html',
-                    controller: function($scope, $uibModalInstance, params) {
-                        $scope.title = params.title || '确认';
-                        $scope.content = params.content;
-
-                        $scope.Close = function(isYes) {
-                            $uibModalInstance.close(isYes);
-                        }
-                    },
-                    resolve: {
-                        params: function() {
-                            return {
-                                content: content,
-                                title: title,
-                            }
-                        }
-                    }
-                });
-                return win.result;
-            },
-
-            /**
-             * @Deprecated
-             */
-            Form: function(scope, params) {
-                var win = $uibModal.open({
-                    templateUrl: '/zjs/tpls/dialog-form.html',
-                    controller: function($scope, $uibModalInstance, params) {
-                        angular.extend($scope, params);
-
-                        $scope.Close = function(isYes) {
-                            if (isYes) {
-                                $scope.Confirm().then(function(){
-                                    $uibModalInstance.close(isYes);
-                                }, Errhandler);
-                            }else {
-                                $uibModalInstance.close(isYes);
-                            }
-                        }
-                    },
-                    scope: scope,
-                    size: 'lg',
-                    resolve: {
-                        params: function() {
-                            return params;
-                        }
-                    }
-                });
-                return win.result;
-            },
-
-        }
-    }
-})
-
-
-/**
  * ControllerHelper is the most important tool in zjs lib.
  * It injects the most useful methods and variables into $scope. likes:
  * - $scope.isNew
@@ -291,6 +220,77 @@ app.provider('ControllerHelper', function(){
                 return InitLoad();
 
             }
+        }
+    }
+})
+
+
+/**
+ * service.js define a set of Angular services. 
+ * For simpleness, the services are not be packaged as a Angular module.
+ * As the default convention, just place '<script src="service.js">' after
+ * var app = angular.module('xxxxx', [.....]).
+ *
+ * TODO: change the services to different modules.
+ * 
+ */
+
+app.provider('Dialogs', function() {
+    this.$get = function($uibModal) {
+        return {
+            Confirm: function(content, title) {
+                var win = $uibModal.open({
+                    templateUrl: '/zjs/tpls/dialog-confirm.html',
+                    controller: function($scope, $uibModalInstance, params) {
+                        $scope.title = params.title || '确认';
+                        $scope.content = params.content;
+
+                        $scope.Close = function(isYes) {
+                            $uibModalInstance.close(isYes);
+                        }
+                    },
+                    resolve: {
+                        params: function() {
+                            return {
+                                content: content,
+                                title: title,
+                            }
+                        }
+                    }
+                });
+                return win.result;
+            },
+
+            /**
+             * @Deprecated
+             */
+            Form: function(scope, params) {
+                var win = $uibModal.open({
+                    templateUrl: '/zjs/tpls/dialog-form.html',
+                    controller: function($scope, $uibModalInstance, params) {
+                        angular.extend($scope, params);
+
+                        $scope.Close = function(isYes) {
+                            if (isYes) {
+                                $scope.Confirm().then(function(){
+                                    $uibModalInstance.close(isYes);
+                                }, Errhandler);
+                            }else {
+                                $uibModalInstance.close(isYes);
+                            }
+                        }
+                    },
+                    scope: scope,
+                    size: 'lg',
+                    resolve: {
+                        params: function() {
+                            return params;
+                        }
+                    }
+                });
+                return win.result;
+            },
+
         }
     }
 })

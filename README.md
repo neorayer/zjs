@@ -6,8 +6,92 @@
 - Zjs is a set of **convention** for enterprise web app based on Angualar and Node.
 - Zjs is one of the **best practice** of MEAN(MongoDB, Express, Angular, Node).
 
+## Fetures on front-end
 
-## Directories and files convention
+### route.js
+
+StateCreater() specifies a set of convention to define routes in Angular 1.x. It depends on 'angular-ui/ui.router'.
+
+Examples:
+ 
+    app.config(function($stateProvider){
+       var sc = new StateCreater('/ui-user/pc/m/', $stateProvider);
+ 
+       sc.createStates('home', 'home');
+       sc.createStates('dashboard', 'dashboard');
+       sc.createStates('product', 'product', null, null, globalResolve);
+       sc.createStates('product', 'product.category');
+       sc.createStates('product', 'product.one.editwb');
+    }
+
+
+Each createState() will create 7 states of a module, they can cover most all the states of business logic.
+
+
+### model.js
+
+model.js is a tool kit to simplify Model implements in Angular 1.x Framework. 
+
+It's almost the best part of zjs. The coolest features includes:
+
+ - **CACHE**: Automatic local cache for single model object or collection.
+ - **RESTful**: Compatible any RESTful back-end.
+ - **FILTER**: Both remote and local data filter are supported.
+ - **POPULATE**: local property populating.
+ - **SIMPLE**: Define a model object by ONLY ONE statement like: 
+ 
+Example:
+
+    DefineCommonRS(app, '/u', 'product',    'products');
+
+
+### service.js: ControllerHelper
+
+ControllerHelper reduces 70%(I guess) code for angular controller. It injects the most useful methods and variables into $scope. likes:
+
+ - $scope.isNew
+ - $scope.formProduct
+ - $scope.product
+ - $scope.LoadList()
+ - $scope.Delete()
+ - $scope.DeleteChecked()
+ - $scope.Save()
+ - $scope.Edit()
+ - $scope.Cancel()
+ - and so on.
+
+Ussage Example:
+
+    ControllerHelper.Init({
+        scope:     $scope,
+        controller: 'ProductCategoryController',
+        modelLabel: 'Categories of product',
+        modelName:  'category',
+        rs:         CategoryRS,
+        restricts:  null,
+        stateHead:  null,
+        newTpl:     {},
+    }).then(function(){
+    });
+
+
+### zform
+
+Zform is a set of AngularJS directives to generate Bootstrap 3 ready forms from a JSON object. It's much more powerful than most popular similar solutions on Github. like: [angular-schema-form], [angular-dynamic-forms] and so on.
+
+Read the source code in folder zform and try the demo in zform/demo, you will addicted in it.
+
+
+### ztree
+
+Ztree is an AngularJS directive to implement editable tree view. The algo is quite clever and neat, but the power is strong. 
+
+### army-knife.js
+
+Utils, still need optimize.
+
+
+## Files convention of 'zjs app'
     + bower_components/
     + node_modules/ 
     + theme/            // theme templates
@@ -51,6 +135,7 @@
 
 ## Do you should use zjs?
 **No, you shouldn't.**, unless you are the member of Rui Zhou's team. because:
+
 1. Zjs is still in developing. Large, constructional alteration is quite possible.
 2. No sufficient document to support your development.
 3. Zjs is fit for single page webapp only.
