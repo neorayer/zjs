@@ -131,6 +131,7 @@ Utils, still need optimize.
             - services/     
             - utils/
             - config.js     // configure file for App
+        * test/         // unit test
         * zjs/          // HERE IS THE REAL zjs code
 
 ## Do you should use zjs?
