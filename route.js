@@ -127,3 +127,5 @@ var StateCreater = function(moduleDir, stateProvider) {
     }
 }
 
+var module = module  || {};
+module.exports = StateCreater;
